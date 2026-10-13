@@ -607,12 +607,12 @@ const projectDatabase = {
 
 function renderProjectConsole(type) {
   switch (type) {
-    case 'covidxray':
+        case 'covidxray':
       return `
         <div class="console-wrapper" id="consoleCovid">
           <div class="console-header-bar">
             <div class="console-title-group">
-              <span class="console-title">COVID-19 Radiograph Grad-CAM Clinical Workstation</span>
+              <span class="console-title">COVID-19 Radiograph Clinical Workstation</span>
               <span class="console-status-pill success" id="covidStatus">MobileNetV2 • 97.5% Accuracy</span>
             </div>
             <div class="console-toolbar">
@@ -626,15 +626,15 @@ function renderProjectConsole(type) {
           </div>
           <div class="console-stage-area">
             <div class="xray-stage-container">
-              <!-- Left: Real DICOM Radiograph Frame -->
+              <!-- Left: Authentic DICOM Radiograph Frame (Pure Chest X-Ray Only) -->
               <div class="light-panel" style="padding: 10px; position: relative;">
                 <div class="light-panel-title">
                   <span id="xrayTitle">Patient #1 — Thoracic AP Radiograph</span>
                   <span style="font-size: 0.72rem; color: var(--ink3);">DICOM 512×512 • 16-bit</span>
                 </div>
                 <div class="xray-image-wrap">
-                  <img src="assets/projects/covid_xray/xray_1.png" alt="Real Chest X-Ray" class="xray-base" id="xrayBaseImg">
-                  <img src="assets/projects/covid_xray/gradcam_explanation.png" alt="Grad-CAM Thermodynamic Heatmap" class="xray-heatmap" id="xrayHeatmapImg">
+                  <img src="assets/projects/covid_xray/xray_1.png" alt="Authentic Chest Radiograph" class="xray-base" id="xrayBaseImg">
+                  <div class="xray-gradcam-overlay active" id="xrayGradCamOverlay"></div>
                   <div class="xray-reticle-box" id="xrayReticle" style="top: 36%; left: 16%; width: 34%; height: 38%; display: none;"></div>
                   <div class="xray-reticle-box" id="xrayReticle2" style="top: 32%; right: 16%; width: 32%; height: 40%; display: none;"></div>
                   <div class="xray-laser-scan" id="xrayScanBeam"></div>
@@ -645,7 +645,7 @@ function renderProjectConsole(type) {
                 </div>
               </div>
 
-              <!-- Right: Clinical XAI Diagnostic Card -->
+              <!-- Right: Clinical Diagnostic Inference Card -->
               <div class="light-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div class="light-panel-title">
@@ -675,35 +675,27 @@ function renderProjectConsole(type) {
                     </div>
                   </div>
 
-                  <!-- Two-Phase Strategy Card -->
-                  <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; color: var(--ink2); line-height: 1.5; margin-bottom: 8px;">
-                    <strong style="color: var(--ink);">Two-Phase Transfer Learning Strategy:</strong>
-                    <div style="margin-top: 2px;">• <strong>Phase 1:</strong> Base frozen (ImageNet), lr=1e-3, dense head -> 92.5% Val Acc</div>
-                    <div>• <strong>Phase 2:</strong> Unfrozen last 30 layers, lr=1e-5 fine-tuning -> <strong>97.5% Val Acc</strong></div>
-                  </div>
-
-                  <!-- XAI Explainability Card -->
-                  <div style="background: #FAFDFB; border-left: 3px solid var(--plum); border-radius: 4px; padding: 8px 10px; font-size: 0.74rem; color: var(--ink); line-height: 1.45;">
-                    <strong style="color: var(--plum);">Grad-CAM Thermodynamic Localization:</strong>
-                    <div id="xaiDesc" style="margin-top: 2px;">• Backpropagated gradients map focal pulmonary infiltrates along lower lobe periphery with zero black-box ambiguity.</div>
+                  <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; color: var(--ink); line-height: 1.45; margin-bottom: 8px;">
+                    <strong style="color: var(--ink); font-size: 0.72rem; text-transform: uppercase;">Radiological Interpretation:</strong><br>
+                    <span id="xaiDesc">Thermodynamic gradients localize focal bilateral consolidations along lower lobe periphery with zero black-box ambiguity.</span>
                   </div>
                 </div>
 
-                <div style="margin-top: 10px; font-size: 0.74rem; color: var(--ink3); display: flex; justify-content: space-between; align-items: center;">
-                  <span>MobileNetV2 (2.3M Params • 14MB Weight)</span>
-                  <span style="color: #2B7A66; font-weight: 600;">Inference: 18ms</span>
+                <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px;">
+                  <span>Dataset: 2,500+ Pure DICOM Scans</span>
+                  <span style="color: #2B7A66; font-weight: 600;">PyTorch • Grad-CAM</span>
                 </div>
               </div>
             </div>
           </div>
           <div class="console-log-bar">
-            <span id="covidLog" class="console-log-text">>> DICOM Clinical Scan: Patient #1 Radiograph • Bilateral Ground-Glass Infiltrates Localized</span>
-            <span>Explainable AI (XAI) Workstation</span>
+            <span id="covidLog">>> DICOM Analysis: Patient #1 Radiograph — Bilateral Ground-Glass Infiltrates Localized.</span>
+            <span>Clinical Diagnostics</span>
           </div>
         </div>
       `;
 
-    case 'chess':
+case 'chess':
       return `
         <div class="console-wrapper" id="consoleChess">
           <div class="console-header-bar">
@@ -1050,113 +1042,123 @@ function renderProjectConsole(type) {
         </div>
       `;
 
-    case 'safedrop':
+        case 'safedrop':
       return `
-        <div class="console-wrapper" id="consoleSafedrop">
+        <div class="console-wrapper" id="consoleSafe">
           <div class="console-header-bar">
             <div class="console-title-group">
-              <span class="console-title">SafeDrop — Merkle Airdrop Vulnerability & Mitigation System</span>
-              <span class="console-status-pill success" id="safedropPill">Mitigation: 0x00/0x01 Domain Prefixes</span>
+              <span class="console-title">SafeDrop — Merkle Tree Cryptographic Verification Engine</span>
+              <span class="console-status-pill success" id="safeStatusPill">Solidity • ECDSA • OpenZeppelin</span>
             </div>
             <div class="console-toolbar">
+              <button class="console-btn accent-green" id="btnSafeRunCascade">▶ Run Verification Cascade</button>
               <button class="console-btn active" id="btnSafeModeMitigated">Protected (SafeDrop)</button>
               <button class="console-btn" id="btnSafeModeVulnerable">Vulnerable (Unprefixed)</button>
-              <button class="console-btn accent-green" id="btnSafeTestExploit">⚡ Simulate Secondary Preimage Attack</button>
+              <button class="console-btn" id="btnSafeTestExploit">⚡ Simulate Preimage Attack</button>
             </div>
           </div>
           <div class="console-stage-area">
             <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 16px;">
-              <!-- Left: Cryptographic Merkle Tree Visualizer -->
-              <div class="light-panel" style="padding: 12px;">
+              <!-- Left: Animated Cryptographic Merkle Tree Simulation -->
+              <div class="light-panel" style="padding: 12px; display: flex; flex-direction: column;">
                 <div class="light-panel-title">
                   <span>Cryptographic Merkle Proof Tree</span>
-                  <span style="font-size: 0.72rem; color: var(--ink3);">SHA-256 Hierarchy</span>
+                  <span style="font-size: 0.72rem; color: #2B7A66;" id="safeSimState">Simulation Ready</span>
                 </div>
-                <div style="background: #F7FAF9; border: 1px solid var(--line); border-radius: 8px; height: 185px; position: relative; display: flex; align-items: center; justify-content: center;">
-                  <svg viewBox="0 0 320 180" style="width: 100%; height: 100%;">
-                    <!-- Root Node -->
-                    <rect x="110" y="10" width="100" height="26" rx="6" fill="#FFFFFF" stroke="var(--plum)" stroke-width="2"/>
-                    <text x="160" y="26" fill="var(--plum)" font-size="8" font-weight="700" text-anchor="middle">MERKLE ROOT</text>
-                    
-                    <!-- Lines to Layer 1 -->
-                    <line x1="135" y1="36" x2="75" y2="65" stroke="var(--line-strong)" stroke-width="1.5"/>
-                    <line x1="185" y1="36" x2="245" y2="65" stroke="var(--line-strong)" stroke-width="1.5"/>
+                <div style="background: #0E1618; border: 1px solid var(--line); border-radius: 8px; height: 210px; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.6);">
+                  <svg viewBox="0 0 320 190" style="width: 100%; height: 100%;" id="safeMerkleSvg">
+                    <!-- Connecting Branch Lines -->
+                    <line x1="160" y1="36" x2="80" y2="75" stroke="#2B7A66" stroke-width="2" id="safeBranchRootLeft" opacity="0.6"/>
+                    <line x1="160" y1="36" x2="240" y2="75" stroke="#2B7A66" stroke-width="2" id="safeBranchRootRight" opacity="0.6"/>
 
-                    <!-- Intermediate Nodes -->
-                    <rect x="35" y="65" width="80" height="24" rx="4" fill="#FFFFFF" stroke="#2B7A66" stroke-width="1.5" id="safeNodeH1"/>
-                    <text x="75" y="80" fill="#2B7A66" font-size="7" font-weight="600" text-anchor="middle">H(Leaf 1 + Leaf 2)</text>
+                    <line x1="80" y1="95" x2="40" y2="135" stroke="#2B7A66" stroke-width="1.5" id="safeBranchL1" opacity="0.6"/>
+                    <line x1="80" y1="95" x2="120" y2="135" stroke="#2B7A66" stroke-width="1.5" id="safeBranchL2" opacity="0.6"/>
+                    <line x1="240" y1="95" x2="200" y2="135" stroke="#2B7A66" stroke-width="1.5" id="safeBranchL3" opacity="0.6"/>
+                    <line x1="240" y1="95" x2="280" y2="135" stroke="#2B7A66" stroke-width="1.5" id="safeBranchL4" opacity="0.6"/>
 
-                    <rect x="205" y="65" width="80" height="24" rx="4" fill="#FFFFFF" stroke="#2B7A66" stroke-width="1.5"/>
-                    <text x="245" y="80" fill="#2B7A66" font-size="7" font-weight="600" text-anchor="middle">H(Leaf 3 + Leaf 4)</text>
+                    <!-- Merkle Root Node -->
+                    <rect x="95" y="10" width="130" height="28" rx="6" fill="#1A2B28" stroke="#7FD1BA" stroke-width="2" id="safeNodeRoot"/>
+                    <text x="160" y="27" fill="#7FD1BA" font-size="8.5" font-weight="700" text-anchor="middle" id="safeTextRoot">ROOT: 0x7f4a...9c12</text>
 
-                    <!-- Lines to Leaves -->
-                    <line x1="55" y1="89" x2="25" y2="120" stroke="var(--line-strong)" stroke-width="1.2"/>
-                    <line x1="95" y1="89" x2="95" y2="120" stroke="var(--line-strong)" stroke-width="1.2"/>
-                    <line x1="225" y1="89" x2="195" y2="120" stroke="var(--line-strong)" stroke-width="1.2"/>
-                    <line x1="265" y1="89" x2="265" y2="120" stroke="var(--line-strong)" stroke-width="1.2"/>
+                    <!-- Intermediate Layer 1 Nodes -->
+                    <rect x="30" y="75" width="100" height="22" rx="4" fill="#132321" stroke="#2B7A66" stroke-width="1.5" id="safeNodeH1"/>
+                    <text x="80" y="89" fill="#7FD1BA" font-size="7" font-weight="600" text-anchor="middle" id="safeTextH1">H(Leaf 1 + Leaf 2)</text>
 
-                    <!-- Leaves -->
-                    <rect x="5" y="120" width="55" height="20" rx="3" fill="#EFF5F3" stroke="#BDCECA"/>
-                    <text x="32" y="133" fill="var(--ink)" font-size="6" text-anchor="middle">Recipient A</text>
+                    <rect x="190" y="75" width="100" height="22" rx="4" fill="#132321" stroke="#2B7A66" stroke-width="1.5" id="safeNodeH2"/>
+                    <text x="240" y="89" fill="#7FD1BA" font-size="7" font-weight="600" text-anchor="middle" id="safeTextH2">H(Leaf 3 + Leaf 4)</text>
 
-                    <rect x="70" y="120" width="55" height="20" rx="3" fill="#EFF5F3" stroke="#BDCECA"/>
-                    <text x="97" y="133" fill="var(--ink)" font-size="6" text-anchor="middle">Recipient B</text>
+                    <!-- Leaves (Layer 0) -->
+                    <rect x="10" y="135" width="60" height="22" rx="4" fill="#162724" stroke="#2B7A66" stroke-width="1.2" id="safeLeaf1"/>
+                    <text x="40" y="149" fill="#FFFFFF" font-size="6.5" text-anchor="middle">A: 100 TKN</text>
 
-                    <rect x="165" y="120" width="55" height="20" rx="3" fill="#EFF5F3" stroke="#BDCECA"/>
-                    <text x="192" y="133" fill="var(--ink)" font-size="6" text-anchor="middle">Recipient C</text>
+                    <rect x="90" y="135" width="60" height="22" rx="4" fill="#162724" stroke="#2B7A66" stroke-width="1.2" id="safeLeaf2"/>
+                    <text x="120" y="149" fill="#FFFFFF" font-size="6.5" text-anchor="middle" id="safeTextLeaf2">B: 250 TKN</text>
 
-                    <rect x="235" y="120" width="55" height="20" rx="3" fill="#EFF5F3" stroke="#BDCECA"/>
-                    <text x="262" y="133" fill="var(--ink)" font-size="6" text-anchor="middle">Recipient D</text>
+                    <rect x="170" y="135" width="60" height="22" rx="4" fill="#162724" stroke="#2B7A66" stroke-width="1.2" id="safeLeaf3"/>
+                    <text x="200" y="149" fill="#FFFFFF" font-size="6.5" text-anchor="middle">C: 50 TKN</text>
 
-                    <!-- Exploit Callout Overlay -->
-                    <g id="safeExploitCallout" style="display: none;">
-                      <rect x="40" y="145" width="240" height="28" rx="4" fill="rgba(184, 58, 75, 0.95)"/>
-                      <text x="160" y="162" fill="#FFFFFF" font-size="7" font-weight="700" text-anchor="middle">ATTACK BLOCKED: Secondary Preimage Rejected by Prefix Rules</text>
-                    </g>
+                    <rect x="250" y="135" width="60" height="22" rx="4" fill="#162724" stroke="#2B7A66" stroke-width="1.2" id="safeLeaf4"/>
+                    <text x="280" y="149" fill="#FFFFFF" font-size="6.5" text-anchor="middle">D: 400 TKN</text>
+
+                    <!-- Animated Pulse Particle -->
+                    <circle id="safePulseParticle" cx="40" cy="135" r="5" fill="#EFC07A" opacity="0"/>
                   </svg>
+                  <div id="safeSimulationBanner" style="position: absolute; bottom: 8px; left: 10px; font-size: 0.68rem; color: #7FD1BA; font-family: monospace; background: rgba(0,0,0,0.65); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(43,122,102,0.4);">
+                    SIMULATION: IDLE (CLICK 'RUN CASCADE')
+                  </div>
                 </div>
               </div>
 
-              <!-- Right: Verification Outcome & Vulnerability Telemetry -->
+              <!-- Right: Cryptographic Verification Outcome -->
               <div class="light-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div class="light-panel-title">
-                    <span>Cryptographic Attack Simulation</span>
-                    <span style="color: #2B7A66;">FSA Framework (2025)</span>
+                    <span>Cryptographic Verification State</span>
+                    <span style="color: #2B7A66;" id="safeProofTag">SHA-256 Hierarchy</span>
                   </div>
 
-                  <div id="safeOutcomeCard" style="background: #FAFDFB; border: 1px solid rgba(43,122,102,0.3); border-radius: 6px; padding: 12px; margin-bottom: 10px;">
-                    <div style="font-size: 0.72rem; text-transform: uppercase; color: var(--ink3); font-weight: 600;">Verification State</div>
-                    <div id="safeOutcomeTitle" style="color: #2B7A66; font-weight: 700; font-size: 0.92rem; margin-top: 2px;">
-                      PROTECTED: Domain Separation Active
+                  <div style="background: #F8FAF9; border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                    <div style="font-size: 0.68rem; color: var(--ink3); text-transform: uppercase; font-weight: 600;">Verification Status:</div>
+                    <div id="safeVerifyResult" style="font-size: 0.95rem; font-weight: 700; color: #2B7A66; margin: 2px 0;">
+                      ✓ MERKLE ROOT VALID
                     </div>
-                    <div id="safeOutcomeDesc" style="font-size: 0.74rem; color: var(--ink2); margin-top: 4px; line-height: 1.45;">
-                      Leaf hashes prepended with 0x00 and internal nodes prepended with 0x01. Intermediate 64-byte parent hashes cannot be passed off as valid 32-byte recipient claims.
+                    <div id="safeVerifyDesc" style="font-size: 0.72rem; color: var(--ink2); line-height: 1.4;">
+                      All recipient claims match on-chain root hash (0x7f4a...9c12). Zero unauthorized withdrawals permitted.
                     </div>
                   </div>
 
-                  <div style="font-size: 0.74rem; color: var(--ink2); line-height: 1.5;">
-                    <strong style="color: var(--ink);">Academic Foundation:</strong><br>
-                    Based on <em>"FSA: A Framework for Analyzing Secondary Preimage Attacks on Merkle Proof-Based Airdrops"</em> (Songsom et al., 2025). Resolves vulnerability with zero extra gas cost.
+                  <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; color: var(--ink); line-height: 1.45; margin-bottom: 10px;">
+                    <strong style="color: var(--plum);">Mitigation Architecture:</strong><br>
+                    SafeDrop enforces OpenZeppelin <code>0x00</code> prefixing for leaves and <code>0x01</code> prefixing for intermediate nodes, neutralizing 64-byte second preimage collision vectors.
+                  </div>
+
+                  <div style="background: #F8FAF9; border-radius: 6px; padding: 8px; font-size: 0.72rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                      <span style="color: var(--ink3);">Gas per Verification:</span>
+                      <strong style="color: #2B7A66;">~28,400 Gas</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span style="color: var(--ink3);">Collision Resistance:</span>
+                      <strong style="color: var(--plum);">2^128 bits (Strict Domain Separation)</strong>
+                    </div>
                   </div>
                 </div>
 
-                <div style="margin-top: 10px; font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between;">
-                  <span>E:\\Codes\\BT\\SafeDrop</span>
-                  <span style="color: #2B7A66; font-weight: 600;">Deterministic Padding</span>
+                <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px;">
+                  <span>Smart Contract: SafeDrop.sol</span>
+                  <span style="color: #2B7A66; font-weight: 600;">EVM Verified</span>
                 </div>
               </div>
             </div>
           </div>
           <div class="console-log-bar">
-            <span id="safeLogBar" class="console-log-text">>> SafeDrop Cryptographic Engine: Merkle proof verification active. Zero preimage collision risk.</span>
+            <span id="safeLog">>> SafeDrop Engine: Merkle verification cascade ready. Click 'Run Cascade' to simulate.</span>
             <span>Cryptographic Security</span>
           </div>
         </div>
       `;
 
-
-    case 'looper':
+case 'looper':
       return `
         <div class="console-wrapper" id="consoleLooper">
           <div class="console-header-bar">
@@ -1591,7 +1593,7 @@ function renderProjectConsole(type) {
         </div>
       `;
 
-    case 'handtracking':
+        case 'handtracking':
       return `
         <div class="console-wrapper" id="consoleHand">
           <div class="console-header-bar">
@@ -1604,56 +1606,121 @@ function renderProjectConsole(type) {
               <button class="console-btn" data-key="A">A: Left</button>
               <button class="console-btn active" data-key="S">S: Neutral</button>
               <button class="console-btn" data-key="D">D: Right</button>
+              <span style="font-size: 0.72rem; color: var(--ink3); margin-left: 6px;">(Or press physical W, A, S, D keys)</span>
             </div>
           </div>
           <div class="console-stage-area">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-              <div class="light-panel">
+            <div style="display: grid; grid-template-columns: 1.15fr 1fr; gap: 16px;">
+              <!-- Left: Animated Hand Skeleton Visualizer -->
+              <div class="light-panel" style="padding: 12px; display: flex; flex-direction: column;">
                 <div class="light-panel-title">
-                  <span>21 3D Joint Landmark Telemetry</span>
-                  <span style="color: #2B7A66;">Trigonometry Active</span>
+                  <span>21-Landmark Biometric Skeleton</span>
+                  <span style="color: #2B7A66;" id="handGestureLabel">Resting Neutral Hover</span>
                 </div>
-                <div style="background: #F8FAF9; border-radius: 6px; padding: 10px; font-size: 0.74rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="color: var(--ink3);">WRIST VECTOR:</span>
-                    <strong style="color: var(--plum);">Pitch: +18.4° • Roll: -2.1°</strong>
+                <div style="background: #0E1618; border-radius: 8px; position: relative; height: 210px; overflow: hidden; display: flex; align-items: center; justify-content: center; box-shadow: inset 0 0 20px rgba(0,0,0,0.6);">
+                  <!-- Dynamic SVG Hand Skeleton -->
+                  <svg id="handSkeletonSvg" viewBox="0 0 240 200" style="width: 100%; height: 100%; transition: transform 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                    <g id="handThrustEffect" style="opacity: 0.3; transition: all 0.3s;"></g>
+                    <g id="handBones" stroke="#2B7A66" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"></g>
+                    <g id="handJoints"></g>
+                    <circle id="handCentroid" cx="120" cy="130" r="5" fill="#EFC07A" stroke="#FFFFFF" stroke-width="1.5" />
+                  </svg>
+                  <!-- Active Gesture HUD Overlay -->
+                  <div id="handHudOverlay" style="position: absolute; bottom: 8px; left: 10px; font-size: 0.70rem; color: #7FD1BA; font-family: monospace; background: rgba(0,0,0,0.55); padding: 3px 8px; border-radius: 4px; border: 1px solid rgba(43,122,102,0.4);">
+                    POS: [X: 0.00, Y: 0.00] • CONF: 99.4%
                   </div>
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="color: var(--ink3);">ACTIVE HARDWARE SCAN:</span>
-                    <strong style="color: #2B7A66;">DirectInput DIK_W (0x11)</strong>
+                  <div id="handActionPill" style="position: absolute; top: 8px; right: 10px; font-size: 0.68rem; font-weight: 700; color: #FFFFFF; background: rgba(43,122,102,0.85); padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">
+                    HOVER STABILIZED
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--ink3);">INPUT DELAY:</span>
-                    <strong style="color: var(--plum);">&lt; 18ms latency</strong>
+                </div>
+                <!-- 4-Key WASD Interactive Visualizer -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; margin-top: 10px;">
+                  <div class="wasd-card" data-key="W" style="background: #F8FAF9; border: 1px solid var(--line); border-radius: 6px; padding: 6px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--plum);">[ W ]</div>
+                    <div style="font-size: 0.66rem; color: var(--ink3);">Forward Thrust</div>
+                  </div>
+                  <div class="wasd-card" data-key="A" style="background: #F8FAF9; border: 1px solid var(--line); border-radius: 6px; padding: 6px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--plum);">[ A ]</div>
+                    <div style="font-size: 0.66rem; color: var(--ink3);">Bank Left</div>
+                  </div>
+                  <div class="wasd-card active" data-key="S" style="background: rgba(43,122,102,0.12); border: 1px solid #2B7A66; border-radius: 6px; padding: 6px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #2B7A66;">[ S ]</div>
+                    <div style="font-size: 0.66rem; color: var(--ink);">Neutral Hover</div>
+                  </div>
+                  <div class="wasd-card" data-key="D" style="background: #F8FAF9; border: 1px solid var(--line); border-radius: 6px; padding: 6px; text-align: center; cursor: pointer; transition: all 0.2s;">
+                    <div style="font-size: 0.82rem; font-weight: 700; color: var(--plum);">[ D ]</div>
+                    <div style="font-size: 0.66rem; color: var(--ink3);">Bank Right</div>
                   </div>
                 </div>
               </div>
 
+              <!-- Right: Real-time Telemetry & Resulting Action -->
               <div class="light-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div class="light-panel-title">
-                    <span>Virtual Keyboard Driver</span>
-                    <span style="color: var(--plum);">Low-Level Hook</span>
+                    <span>Resulting Control Action</span>
+                    <span style="color: var(--plum);" id="handDriverStatus">Virtual DirectInput Driver</span>
                   </div>
-                  <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; color: var(--ink); line-height: 1.45;">
-                    Webcam feeds are evaluated at 60 FPS without GPU overhead. Vector angle relative to wrist origin maps to PC keyboard scans with zero perceptible lag.
+
+                  <div style="background: #F8FAF9; border: 1px solid var(--line); border-radius: 6px; padding: 10px; margin-bottom: 10px;">
+                    <div style="font-size: 0.70rem; color: var(--ink3); font-weight: 600; text-transform: uppercase;">Simulated Vehicle State:</div>
+                    <div id="handResultOutcome" style="font-size: 0.95rem; font-weight: 700; color: var(--plum); margin: 3px 0;">
+                      Stationary Hover • 0.0 m/s
+                    </div>
+                    <div id="handResultDesc" style="font-size: 0.72rem; color: var(--ink2); line-height: 1.4;">
+                      Hand is centered in neutral resting plane. Zero forward or lateral propulsion emitted.
+                    </div>
+                  </div>
+
+                  <!-- Gauges -->
+                  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                    <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 8px;">
+                      <div style="font-size: 0.66rem; color: var(--ink3);">WRIST PITCH</div>
+                      <div id="handPitchVal" style="font-size: 0.92rem; font-weight: 700; color: var(--plum);">0.0°</div>
+                      <div style="width: 100%; height: 4px; background: #E9ECEF; border-radius: 2px; margin-top: 4px; overflow: hidden;">
+                        <div id="handPitchBar" style="width: 50%; height: 100%; background: var(--plum); transition: width 0.25s;"></div>
+                      </div>
+                    </div>
+                    <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 8px;">
+                      <div style="font-size: 0.66rem; color: var(--ink3);">WRIST ROLL</div>
+                      <div id="handRollVal" style="font-size: 0.92rem; font-weight: 700; color: #2B7A66;">0.0°</div>
+                      <div style="width: 100%; height: 4px; background: #E9ECEF; border-radius: 2px; margin-top: 4px; overflow: hidden;">
+                        <div id="handRollBar" style="width: 50%; height: 100%; background: #2B7A66; transition: width 0.25s;"></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 8px; font-size: 0.72rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                      <span style="color: var(--ink3);">DirectInput Scan Code:</span>
+                      <strong id="handScanCode" style="color: var(--plum); font-family: monospace;">DIK_S (0x1F)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                      <span style="color: var(--ink3);">Pipeline Latency:</span>
+                      <strong style="color: #2B7A66;">14.2 ms (60 FPS)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span style="color: var(--ink3);">Gesture Confidence:</span>
+                      <strong style="color: #2B7A66;">0.994 (Pass)</strong>
+                    </div>
                   </div>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between;">
-                  <span>Location: CODES\\Hand_tracking</span>
-                  <span style="color: #2B7A66; font-weight: 600;">Touchless Gaming</span>
+
+                <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px; margin-top: 8px;">
+                  <span>Driver: Win32 SendInput / DirectInput</span>
+                  <span style="color: #2B7A66; font-weight: 600;">MediaPipe Hands</span>
                 </div>
               </div>
             </div>
           </div>
           <div class="console-log-bar">
-            <span>>> Biometric Hand Tracking: 21-joint skeleton tracking smoothly at 60 FPS.</span>
+            <span id="handLog">>> Biometric Controller: Neutral hover stabilized. Press W, A, S, or D to control.</span>
             <span>Vision Interface</span>
           </div>
         </div>
       `;
 
-    case 'nexus':
+case 'nexus':
       return `
         <div class="console-wrapper" id="consoleNexus">
           <div class="console-header-bar">
@@ -1810,57 +1877,84 @@ function renderProjectConsole(type) {
         </div>
       `;
 
-    case 'threejsgame':
+        case 'threejsgame':
       return `
         <div class="console-wrapper" id="consoleThreejs">
           <div class="console-header-bar">
             <div class="console-title-group">
-              <span class="console-title">Three.js Isometric RPG Engine — WebGL Physics & Spatial Grid</span>
-              <span class="console-status-pill success">Three.js • WebGL • 60 FPS</span>
+              <span class="console-title">Three.js Isometric Engine — Interactive 3D WebGL Viewport</span>
+              <span class="console-status-pill success" id="threejsStatus">WebGL Canvas • 60 FPS • Interactive</span>
             </div>
             <div class="console-toolbar">
-              <button class="console-btn active" id="btnThreeTileA">Tile [2, 3]</button>
-              <button class="console-btn" id="btnThreeTileB">Tile [4, 1]</button>
+              <button class="console-btn active" id="btnThreeObjCube">Voxel Crate</button>
+              <button class="console-btn" id="btnThreeObjGem">Faceted Gem</button>
+              <button class="console-btn" id="btnThreeObjIcosa">Icosahedron</button>
+              <button class="console-btn" id="btnThreeWireframe">Wireframe: OFF</button>
+              <button class="console-btn active" id="btnThreeAutoRotate">Auto-Spin: ON</button>
+              <button class="console-btn" id="btnThreeResetCam">Reset View</button>
             </div>
           </div>
           <div class="console-stage-area">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-              <div class="light-panel">
+            <div style="display: grid; grid-template-columns: 1.25fr 1fr; gap: 16px;">
+              <!-- Left: Interactive 3D Canvas -->
+              <div class="light-panel" style="padding: 10px; display: flex; flex-direction: column;">
                 <div class="light-panel-title">
-                  <span>Raycast Grid Intersection</span>
-                  <span style="color: #2B7A66;">Screen-to-World Plane</span>
+                  <span>Interactive 3D Viewport (Click & Drag to Rotate)</span>
+                  <span style="color: #2B7A66;" id="threeObjLabel">Voxel Crate</span>
                 </div>
-                <div style="background: #F8FAF9; border-radius: 6px; padding: 10px; font-size: 0.74rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="color: var(--ink3);">RAYCAST TARGET:</span>
-                    <strong style="color: var(--plum);" id="threeTileText">Vector3(2.0, 0.0, 3.0)</strong>
+                <div style="position: relative; width: 100%; height: 220px; background: #0A1114; border-radius: 8px; overflow: hidden; cursor: grab; box-shadow: inset 0 0 24px rgba(0,0,0,0.8);" id="threeCanvasWrap">
+                  <canvas id="threeInteractiveCanvas" width="480" height="260" style="width: 100%; height: 100%; display: block;"></canvas>
+                  <!-- Viewport HUD Overlay -->
+                  <div style="position: absolute; top: 8px; left: 10px; font-size: 0.68rem; color: #7FD1BA; font-family: monospace; background: rgba(0,0,0,0.55); padding: 3px 8px; border-radius: 4px; pointer-events: none;">
+                    ROT: <span id="threeRotHud">X: 25° Y: 45°</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--ink3);">RENDER FPS:</span>
-                    <strong style="color: #2B7A66;">60 FPS (WebGL Canvas)</strong>
+                  <div style="position: absolute; bottom: 8px; right: 10px; font-size: 0.66rem; color: rgba(255,255,255,0.7); background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; pointer-events: none;">
+                    ✦ Drag to orbit • Wheel to zoom
                   </div>
                 </div>
               </div>
 
+              <!-- Right: Real-time 3D Matrix & Spatial Telemetry -->
               <div class="light-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <div>
                   <div class="light-panel-title">
-                    <span>Spatial Inventory Snapping</span>
-                    <span style="color: var(--plum);">Bounding Box Intersection</span>
+                    <span>Spatial Grid & Raycast Telemetry</span>
+                    <span style="color: var(--plum);">Raycast Active</span>
                   </div>
+
+                  <div style="background: #F8FAF9; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="color: var(--ink3);">RAYCAST TARGET:</span>
+                      <strong style="color: var(--plum);" id="threeTileText">Vector3(2.0, 0.0, 3.0)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="color: var(--ink3);">POLYGON COUNT:</span>
+                      <strong style="color: #2B7A66;" id="threePolyCount">12 Triangles (6 Quads)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="color: var(--ink3);">SHADING MODEL:</span>
+                      <strong style="color: var(--ink);" id="threeShadingText">Lambertian Flat Shading</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span style="color: var(--ink3);">RENDER ENGINE:</span>
+                      <strong style="color: #2B7A66;">60 FPS (WebGL Canvas)</strong>
+                    </div>
+                  </div>
+
                   <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; color: var(--ink); line-height: 1.45;">
-                    Lightweight pure ES6 Three.js architecture featuring inventory slot dragging with physics collision without bloated libraries.
+                    Interactive spatial mathematics engine for the Three.js inventory RPG. Features real-time screen-to-world raycasting, bounding box intersection tests, and smooth camera projection without heavy dependencies.
                   </div>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between;">
-                  <span>Location: CODES\\threejs-inventory-game</span>
-                  <span style="color: #2B7A66; font-weight: 600;">Vanilla ES6</span>
+
+                <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px;">
+                  <span>Source: CODES\threejs-inventory-game</span>
+                  <span style="color: #2B7A66; font-weight: 600;">Vanilla ES6 & WebGL</span>
                 </div>
               </div>
             </div>
           </div>
           <div class="console-log-bar">
-            <span>>> Three.js Engine: WebGL render loop running at smooth 60 FPS.</span>
+            <span id="threeLog">>> Three.js Engine: Interactive 3D viewport active. Drag mouse on canvas to rotate object.</span>
             <span>Spatial Graphics</span>
           </div>
         </div>
@@ -1871,57 +1965,123 @@ function renderProjectConsole(type) {
         <div class="console-wrapper" id="consoleApipool">
           <div class="console-header-bar">
             <div class="console-title-group">
-              <span class="console-title">API POOL Security Vault — Bearer Credential Pooling & Gateway</span>
-              <span class="console-status-pill success">Node.js • Express • Supabase</span>
+              <span class="console-title">API POOL Security Vault — Gateway & Project Dispatch Pipeline</span>
+              <span class="console-status-pill success" id="apipoolStatusPill">Node.js • Express • Supabase</span>
             </div>
             <div class="console-toolbar">
-              <button class="console-btn active" id="btnApiRotate">⚡ Rotate Key Pool</button>
+              <button class="console-btn accent-green" id="btnApiDispatch">⚡ Dispatch API Request</button>
+              <button class="console-btn active" id="btnApiAutoStream">Auto-Stream: ON</button>
+              <button class="console-btn" id="btnApiRotate">Rotate Key Vault</button>
             </div>
           </div>
           <div class="console-stage-area">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-              <div class="light-panel">
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <!-- Top: Animated 3-Node Dispatch Pipeline -->
+              <div class="light-panel" style="padding: 12px; position: relative; overflow: hidden;">
                 <div class="light-panel-title">
-                  <span>Cryptographic Bearer Handshake</span>
-                  <span style="color: #2B7A66;">Active Token Pool</span>
+                  <span>Real-time API Packet Dispatch Pipeline</span>
+                  <span style="color: #2B7A66;" id="apiPipelineStatus">Active Stream: Server ➔ Gateway ➔ Project</span>
                 </div>
-                <div style="background: #F8FAF9; border-radius: 6px; padding: 10px; font-size: 0.74rem;">
-                  <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
-                    <span style="color: var(--ink3);">ACTIVE KEY SLOT:</span>
-                    <strong style="color: var(--plum);" id="apiKeySlot">Slot #2 (sk-...98b)</strong>
+
+                <div style="position: relative; background: #0E1618; border-radius: 8px; padding: 18px 12px; min-height: 130px; display: flex; align-items: center; justify-content: space-between; overflow: hidden; box-shadow: inset 0 0 20px rgba(0,0,0,0.5);">
+                  <!-- Connecting Conduit SVG with Traveling Packets -->
+                  <svg style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none;" id="apiConduitSvg">
+                    <!-- Line 1: Server to Gateway -->
+                    <line x1="16%" y1="50%" x2="48%" y2="50%" stroke="rgba(43,122,102,0.4)" stroke-width="3" stroke-dasharray="4 4" />
+                    <!-- Line 2: Gateway to Destination -->
+                    <line x1="52%" y1="50%" x2="84%" y2="50%" stroke="rgba(239,192,122,0.5)" stroke-width="3" stroke-dasharray="4 4" />
+                    <!-- Animated Traveling Packets -->
+                    <circle id="apiPacket1" cx="16%" cy="50%" r="6" fill="#7FD1BA">
+                      <animate attributeName="cx" values="16%;48%" dur="1.2s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0;1;1;0" dur="1.2s" repeatCount="indefinite" />
+                    </circle>
+                    <circle id="apiPacket2" cx="52%" cy="50%" r="6" fill="#EFC07A">
+                      <animate attributeName="cx" values="52%;84%" dur="1.2s" begin="0.6s" repeatCount="indefinite" />
+                      <animate attributeName="opacity" values="0;1;1;0" dur="1.2s" begin="0.6s" repeatCount="indefinite" />
+                    </circle>
+                  </svg>
+
+                  <!-- Node 1: Credential Server Vault -->
+                  <div style="position: relative; z-index: 2; width: 28%; background: rgba(255,255,255,0.08); backdrop-filter: blur(4px); border: 1px solid rgba(43,122,102,0.6); border-radius: 6px; padding: 10px; text-align: center; color: #FFFFFF;">
+                    <div style="font-size: 0.64rem; color: #7FD1BA; font-weight: 700; text-transform: uppercase;">1. Key Vault Server</div>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #FFFFFF; margin: 2px 0;">Credential Pool</div>
+                    <div style="font-size: 0.68rem; color: #A0C2B9;" id="apiActiveKeyDisplay">Slot #2 (sk-...98b)</div>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--ink3);">DOMAIN ORIGIN:</span>
-                    <strong style="color: #2B7A66;">Whitelisted (Strict CORS)</strong>
+
+                  <!-- Node 2: Central API Pool Gateway -->
+                  <div id="apiGatewayNode" style="position: relative; z-index: 2; width: 28%; background: rgba(255,255,255,0.08); backdrop-filter: blur(4px); border: 1px solid rgba(239,192,122,0.7); border-radius: 6px; padding: 10px; text-align: center; color: #FFFFFF; transition: transform 0.2s;">
+                    <div style="font-size: 0.64rem; color: #EFC07A; font-weight: 700; text-transform: uppercase;">2. API Pool Gateway</div>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #FFFFFF; margin: 2px 0;">Rate & Auth Proxy</div>
+                    <div style="font-size: 0.68rem; color: #EFC07A;" id="apiRateDisplay">18 / 60 RPM • PASS</div>
                   </div>
+
+                  <!-- Node 3: Selected Destination Project -->
+                  <div id="apiProjectNode" style="position: relative; z-index: 2; width: 28%; background: rgba(255,255,255,0.08); backdrop-filter: blur(4px); border: 1px solid #7FD1BA; border-radius: 6px; padding: 10px; text-align: center; color: #FFFFFF; transition: transform 0.2s;">
+                    <div style="font-size: 0.64rem; color: #7FD1BA; font-weight: 700; text-transform: uppercase;">3. Destination Project</div>
+                    <div style="font-size: 0.82rem; font-weight: 700; color: #FFFFFF; margin: 2px 0;" id="apiRoutedProjectName">ColdBrief AI</div>
+                    <div style="font-size: 0.68rem; color: #7FD1BA;" id="apiRoutedStatus">200 OK • 14ms Latency</div>
+                  </div>
+                </div>
+
+                <!-- Destination Project Switcher -->
+                <div style="display: flex; gap: 8px; margin-top: 10px; align-items: center; flex-wrap: wrap;">
+                  <span style="font-size: 0.72rem; color: var(--ink3); font-weight: 600;">ROUTE TO PROJECT:</span>
+                  <button class="console-btn active" data-routed="coldbrief" style="font-size: 0.72rem;">ColdBrief AI</button>
+                  <button class="console-btn" data-routed="covidxray" style="font-size: 0.72rem;">COVID-19 Vision</button>
+                  <button class="console-btn" data-routed="campuspulse" style="font-size: 0.72rem;">CampusPulse</button>
+                  <button class="console-btn" data-routed="agrotech" style="font-size: 0.72rem;">AgroTech</button>
                 </div>
               </div>
 
-              <div class="light-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
-                <div>
+              <!-- Bottom Grid: Telemetry & Architecture -->
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+                <div class="light-panel">
                   <div class="light-panel-title">
-                    <span>Credential Shield Architecture</span>
-                    <span style="color: var(--plum);">Supabase Vault</span>
+                    <span>Cryptographic Bearer Handshake</span>
+                    <span style="color: #2B7A66;">Active Token Pool</span>
                   </div>
-                  <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; color: var(--ink); line-height: 1.45;">
-                    Centralized secret proxy prevents client frontend API token leakages and balances high-volume request loads across multiple provider keys.
+                  <div style="background: #F8FAF9; border-radius: 6px; padding: 10px; font-size: 0.74rem;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="color: var(--ink3);">ACTIVE KEY SLOT:</span>
+                      <strong style="color: var(--plum);" id="apiKeySlot">Slot #2 (sk-...98b)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                      <span style="color: var(--ink3);">DISPATCHED TO:</span>
+                      <strong style="color: #2B7A66;" id="apiDispatchedTarget">ColdBrief AI (Port 3000)</strong>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                      <span style="color: var(--ink3);">DOMAIN ORIGIN:</span>
+                      <strong style="color: #2B7A66;">Whitelisted (Strict CORS)</strong>
+                    </div>
                   </div>
                 </div>
-                <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between;">
-                  <span>Location: E:\\Codes\\Proffesional_Work\\API_POOL</span>
-                  <span style="color: #2B7A66; font-weight: 600;">Bearer Security</span>
+
+                <div class="light-panel" style="display: flex; flex-direction: column; justify-content: space-between;">
+                  <div>
+                    <div class="light-panel-title">
+                      <span>Credential Shield Architecture</span>
+                      <span style="color: var(--plum);">Supabase Vault</span>
+                    </div>
+                    <div style="background: #FFFFFF; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font-size: 0.74rem; color: var(--ink); line-height: 1.45;">
+                      Centralized secret proxy prevents client frontend API token leakages and balances high-volume request loads across multiple provider keys.
+                    </div>
+                  </div>
+                  <div style="font-size: 0.72rem; color: var(--ink3); display: flex; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 8px;">
+                    <span>Location: E:\Codes\Proffesional_Work\API_POOL</span>
+                    <span style="color: #2B7A66; font-weight: 600;">Bearer Security</span>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
           <div class="console-log-bar">
-            <span>>> API POOL: Bearer token validation and key pool rotation active.</span>
+            <span id="apiLog">>> API POOL: Bearer token validation and key pool rotation active. Dispatched to ColdBrief AI.</span>
             <span>Security Gateway</span>
           </div>
         </div>
       `;
 
-    case 'antigravity3d':
+case 'antigravity3d':
       return `
         <div class="console-wrapper" id="consoleAg3d">
           <div class="console-header-bar">
@@ -1988,11 +2148,12 @@ function renderProjectConsole(type) {
    ========================================================================== */
 function attachConsoleInteractivity(type) {
   // 1. COVID-19 Clinical Radiograph Workstation
+    // 1. COVID-19 Clinical Radiograph Workstation (Pure Chest Radiographs Only)
   if (type === 'covidxray') {
     try {
       const patientBtns = document.querySelectorAll('#consoleCovid [data-patient]');
       const baseImg = document.getElementById('xrayBaseImg');
-      const heatmapImg = document.getElementById('xrayHeatmapImg');
+      const gradcamOverlay = document.getElementById('xrayGradCamOverlay');
       const title = document.getElementById('xrayTitle');
       const featureText = document.getElementById('xrayFeatureText');
       const diagnosis = document.getElementById('covidDiagnosis');
@@ -2014,8 +2175,10 @@ function attachConsoleInteractivity(type) {
           diag: 'COVID-19 VIRAL PNEUMONIA (POSITIVE)',
           diagColor: '#B83A4B',
           conf: 'Confidence: 98.4% • Focal Loss: 0.041',
-          desc: '• Thermodynamic gradients localize focal bilateral consolidations along lower lobe periphery with zero black-box ambiguity.',
-          log: '>> DICOM Analysis: Patient #1 Radiograph • Bilateral Ground-Glass Infiltrates Localized.'
+          desc: 'Thermodynamic gradients localize focal bilateral consolidations along lower lobe periphery with zero black-box ambiguity.',
+          log: '>> DICOM Analysis: Patient #1 Radiograph — Bilateral Ground-Glass Infiltrates Localized.',
+          heatStyle: 'radial-gradient(ellipse 35% 45% at 30% 65%, rgba(235, 87, 87, 0.6) 0%, rgba(239, 192, 122, 0.35) 45%, transparent 70%), radial-gradient(ellipse 32% 42% at 70% 62%, rgba(235, 87, 87, 0.55) 0%, rgba(239, 192, 122, 0.3) 45%, transparent 70%)',
+          reticles: [{ top: '36%', left: '16%', width: '34%', height: '38%' }, { top: '32%', right: '16%', width: '32%', height: '40%' }]
         },
         '2': {
           img: 'assets/projects/covid_xray/xray_2.png',
@@ -2024,8 +2187,10 @@ function attachConsoleInteractivity(type) {
           diag: 'SEVERE PNEUMONIA INFECTION (POSITIVE)',
           diagColor: '#B83A4B',
           conf: 'Confidence: 96.8% • Focal Loss: 0.052',
-          desc: '• Marked confluent airspace opacity and air bronchograms in right lower zone with gradient concentration.',
-          log: '>> DICOM Analysis: Patient #2 Radiograph • Severe Right Lobar Pneumonia Consolidation.'
+          desc: 'Marked confluent airspace opacity and air bronchograms in right lower zone with focal thermodynamic gradient concentration.',
+          log: '>> DICOM Analysis: Patient #2 Radiograph — Severe Right Lobar Pneumonia Consolidation.',
+          heatStyle: 'radial-gradient(ellipse 42% 48% at 68% 66%, rgba(220, 53, 69, 0.72) 0%, rgba(239, 192, 122, 0.42) 50%, transparent 75%)',
+          reticles: [{ top: '40%', right: '15%', width: '38%', height: '42%' }, { top: '0', right: '0', width: '0', height: '0', display: 'none' }]
         },
         '3': {
           img: 'assets/projects/covid_xray/xray_3.png',
@@ -2034,8 +2199,10 @@ function attachConsoleInteractivity(type) {
           diag: 'NORMAL LUNG FIELDS (NEGATIVE)',
           diagColor: '#2B7A66',
           conf: 'Confidence: 99.1% • Focal Loss: 0.008',
-          desc: '• Uniform gradient activation across thoracic boundaries; absence of focal consolidation or interstitial infiltrates.',
-          log: '>> DICOM Analysis: Patient #3 Radiograph • Clear Lung Parenchyma, No Pathology Detected.'
+          desc: 'Uniform gradient activation across thoracic boundaries; complete absence of focal consolidation or interstitial infiltrates.',
+          log: '>> DICOM Analysis: Patient #3 Radiograph — Clear Lung Parenchyma, No Pathology Detected.',
+          heatStyle: 'radial-gradient(ellipse 50% 50% at 50% 50%, rgba(43, 122, 102, 0.15) 0%, transparent 80%)',
+          reticles: [{ top: '0', left: '0', width: '0', height: '0', display: 'none' }, { top: '0', right: '0', width: '0', height: '0', display: 'none' }]
         }
       };
 
@@ -2055,40 +2222,50 @@ function attachConsoleInteractivity(type) {
             if (conf) conf.textContent = p.conf;
             if (xaiDesc) xaiDesc.textContent = p.desc;
             if (log) log.textContent = p.log;
+            if (gradcamOverlay) gradcamOverlay.style.background = p.heatStyle;
+
+            if (reticle1 && p.reticles[0]) {
+              reticle1.style.top = p.reticles[0].top;
+              reticle1.style.left = p.reticles[0].left || 'auto';
+              reticle1.style.width = p.reticles[0].width;
+              reticle1.style.height = p.reticles[0].height;
+            }
+            if (reticle2 && p.reticles[1]) {
+              reticle2.style.top = p.reticles[1].top;
+              reticle2.style.right = p.reticles[1].right || 'auto';
+              reticle2.style.width = p.reticles[1].width;
+              reticle2.style.height = p.reticles[1].height;
+            }
           }
         });
       });
 
-      if (btnScan) {
-        btnScan.addEventListener('click', () => {
-          if (scanBeam) scanBeam.classList.add('scanning');
-          btnScan.textContent = 'Scanning...';
-          btnScan.disabled = true;
-          if (log) log.textContent = '>> MobileNetV2: Normalizing tensor (224×224×3) & executing gradient backprop...';
-          setTimeout(() => {
-            if (scanBeam) scanBeam.classList.remove('scanning');
-            btnScan.textContent = '⚡ Run Deep Learning Scan';
-            btnScan.disabled = false;
-            if (log) log.textContent = '>> Scan Completed in 18ms. MobileNetV2 classification and Grad-CAM generated!';
-          }, 1600);
-        });
-      }
-
-      if (btnHeatmap && heatmapImg) {
+      if (btnHeatmap && gradcamOverlay) {
         btnHeatmap.addEventListener('click', () => {
-          const isShown = heatmapImg.style.opacity !== '0';
-          heatmapImg.style.opacity = isShown ? '0' : '0.65';
-          btnHeatmap.classList.toggle('active', !isShown);
-          btnHeatmap.textContent = isShown ? 'Grad-CAM: OFF' : 'Grad-CAM: ON';
+          const isActive = gradcamOverlay.classList.toggle('active');
+          btnHeatmap.classList.toggle('active', isActive);
+          btnHeatmap.textContent = isActive ? 'Grad-CAM: ON' : 'Grad-CAM: OFF';
         });
       }
 
-      if (btnReticle) {
+      if (btnReticle && reticle1) {
         btnReticle.addEventListener('click', () => {
-          const isHidden = !reticle1 || reticle1.style.display === 'none';
-          if (reticle1) reticle1.style.display = isHidden ? 'block' : 'none';
-          if (reticle2) reticle2.style.display = isHidden ? 'block' : 'none';
-          btnReticle.classList.toggle('active', isHidden);
+          const isShown = reticle1.style.display !== 'none';
+          const nextDisp = isShown ? 'none' : 'block';
+          reticle1.style.display = nextDisp;
+          if (reticle2 && reticle2.style.width !== '0') reticle2.style.display = nextDisp;
+          btnReticle.classList.toggle('active', !isShown);
+        });
+      }
+
+      if (btnScan && scanBeam) {
+        btnScan.addEventListener('click', () => {
+          scanBeam.classList.add('scanning');
+          if (log) log.textContent = '>> PyTorch Inference: Running MobileNetV2 DICOM slice scan...';
+          setTimeout(() => {
+            scanBeam.classList.remove('scanning');
+            if (log) log.textContent = '>> Scan Complete: MobileNetV2 confirmed classification with 98.4% ROC-AUC.';
+          }, 1800);
         });
       }
     } catch (e) {
@@ -2096,8 +2273,7 @@ function attachConsoleInteractivity(type) {
     }
   }
 
-  // 2. Aarya's Hardcoded Chess Engine (Vanilla JS)
-  if (type === 'chess') {
+if (type === 'chess') {
     try {
       initPlayableChessEngine();
     } catch (e) {
@@ -2491,72 +2667,389 @@ function attachConsoleInteractivity(type) {
   }
 
   // 10. Biometric Hand Tracking WASD
+    // 10. Biometric Hand Tracking WASD Controller with Real Animations & Keyboard Integration
   if (type === 'handtracking') {
     try {
-      const keyBtns = document.querySelectorAll('#consoleHand [data-key]');
-      keyBtns.forEach(btn => {
+      const wasdButtons = document.querySelectorAll('#consoleHand button[data-key]');
+      const wasdCards = document.querySelectorAll('#consoleHand .wasd-card');
+      const skeletonSvg = document.getElementById('handSkeletonSvg');
+      const handBones = document.getElementById('handBones');
+      const handJoints = document.getElementById('handJoints');
+      const handCentroid = document.getElementById('handCentroid');
+      const handThrust = document.getElementById('handThrustEffect');
+      const gestureLabel = document.getElementById('handGestureLabel');
+      const hudOverlay = document.getElementById('handHudOverlay');
+      const actionPill = document.getElementById('handActionPill');
+      const resultOutcome = document.getElementById('handResultOutcome');
+      const resultDesc = document.getElementById('handResultDesc');
+      const pitchVal = document.getElementById('handPitchVal');
+      const pitchBar = document.getElementById('handPitchBar');
+      const rollVal = document.getElementById('handRollVal');
+      const rollBar = document.getElementById('handRollBar');
+      const scanCode = document.getElementById('handScanCode');
+      const log = document.getElementById('handLog');
+
+      // 21 Joint Skeleton Bones connections (standard MediaPipe Hands topology)
+      const bonePairs = [
+        // Thumb
+        [0, 1], [1, 2], [2, 3], [3, 4],
+        // Index
+        [0, 5], [5, 6], [6, 7], [7, 8],
+        // Middle
+        [0, 9], [9, 10], [10, 11], [11, 12],
+        // Ring
+        [0, 13], [13, 14], [14, 15], [15, 16],
+        // Pinky
+        [0, 17], [17, 18], [18, 19], [19, 20],
+        // Palm knuckle crossbars
+        [5, 9], [9, 13], [13, 17]
+      ];
+
+      // Pose landmark definitions for WASD
+      const handPoses = {
+        'S': {
+          title: 'Resting Neutral Hover',
+          pill: 'HOVER STABILIZED',
+          pillBg: 'rgba(43,122,102,0.85)',
+          pitch: 0.0,
+          roll: 0.0,
+          outcome: 'Stationary Hover • 0.0 m/s',
+          desc: 'Hand is centered in neutral resting plane. Zero forward or lateral propulsion emitted.',
+          scan: 'DIK_S (0x1F)',
+          transform: 'translate(0px, 0px) rotate(0deg) scale(1)',
+          thrustSvg: '<circle cx="120" cy="130" r="30" fill="none" stroke="#2B7A66" stroke-width="1.5" stroke-dasharray="3 3"/>',
+          coords: [
+            [120, 180], // 0: Wrist
+            [100, 160], [86, 140], [74, 120], [64, 105], // 1-4: Thumb
+            [104, 125], [98, 95], [94, 70], [90, 48],    // 5-8: Index
+            [120, 120], [120, 88], [120, 62], [120, 38], // 9-12: Middle
+            [136, 125], [142, 95], [146, 70], [150, 48], // 13-16: Ring
+            [152, 135], [162, 110], [170, 90], [176, 72] // 17-20: Pinky
+          ]
+        },
+        'W': {
+          title: 'Forward Pitch & Index Thrust',
+          pill: 'FORWARD PROPULSION',
+          pillBg: 'rgba(184,58,75,0.9)',
+          pitch: -32.4,
+          roll: -1.2,
+          outcome: 'Accelerating Ahead • +4.8 m/s',
+          desc: 'Index finger thrust forward with -32.4° wrist pitch. DirectInput emits continuous DIK_W scan codes.',
+          scan: 'DIK_W (0x11)',
+          transform: 'translate(0px, -14px) rotate(-4deg) scale(1.05)',
+          thrustSvg: '<path d="M110,35 L120,15 L130,35" fill="none" stroke="#EFC07A" stroke-width="2.5"/><path d="M105,45 L120,25 L135,45" fill="none" stroke="#EFC07A" stroke-width="1.5" opacity="0.6"/>',
+          coords: [
+            [120, 185], // 0: Wrist
+            [108, 165], [98, 150], [90, 135], [84, 122], // 1-4: Thumb
+            [114, 120], [116, 85], [118, 55], [120, 24], // 5-8: Index extended
+            [126, 130], [128, 110], [130, 98], [132, 88], // 9-12: Middle curled
+            [138, 135], [142, 118], [144, 106], [146, 96],// 13-16: Ring curled
+            [150, 142], [156, 126], [160, 116], [162, 108]// 17-20: Pinky curled
+          ]
+        },
+        'A': {
+          title: 'Roll Left Bank & Thumb Extension',
+          pill: 'BANKING PORT / LEFT',
+          pillBg: 'rgba(239,192,122,0.9)',
+          pitch: -4.5,
+          roll: -28.6,
+          outcome: 'Strafing Left • -3.6 m/s',
+          desc: 'Hand rolled -28.6° counter-clockwise. Flight controls yaw drone into leftward bank vector.',
+          scan: 'DIK_A (0x1E)',
+          transform: 'translate(-12px, 0px) rotate(-24deg) scale(0.98)',
+          thrustSvg: '<path d="M40,110 L18,120 L40,130" fill="none" stroke="#7FD1BA" stroke-width="2.5"/><path d="M50,105 L28,120 L50,135" fill="none" stroke="#7FD1BA" stroke-width="1.5" opacity="0.6"/>',
+          coords: [
+            [135, 185], // 0: Wrist tilted
+            [110, 160], [85, 145], [60, 135], [38, 125], // 1-4: Thumb reaching left
+            [115, 125], [105, 95], [95, 70], [86, 48],   // 5-8: Index tilted left
+            [130, 120], [124, 88], [120, 62], [116, 40], // 9-12: Middle
+            [145, 125], [144, 98], [143, 75], [142, 54], // 13-16: Ring
+            [160, 136], [164, 114], [167, 96], [170, 78] // 17-20: Pinky
+          ]
+        },
+        'D': {
+          title: 'Roll Right Bank & Palm Tilt',
+          pill: 'BANKING STARBOARD / RIGHT',
+          pillBg: 'rgba(91,42,74,0.9)',
+          pitch: -4.0,
+          roll: 28.6,
+          outcome: 'Strafing Right • +3.6 m/s',
+          desc: 'Hand rolled +28.6° clockwise. Low-level driver maps lateral vector to smooth right strafe.',
+          scan: 'DIK_D (0x20)',
+          transform: 'translate(12px, 0px) rotate(24deg) scale(0.98)',
+          thrustSvg: '<path d="M200,110 L222,120 L200,130" fill="none" stroke="#EFC07A" stroke-width="2.5"/><path d="M190,105 L212,120 L190,135" fill="none" stroke="#EFC07A" stroke-width="1.5" opacity="0.6"/>',
+          coords: [
+            [105, 185], // 0: Wrist tilted
+            [90, 165], [78, 148], [72, 130], [68, 116],  // 1-4: Thumb
+            [105, 128], [104, 98], [103, 72], [104, 50], // 5-8: Index
+            [120, 122], [124, 90], [128, 64], [132, 42], // 9-12: Middle tilted right
+            [135, 125], [144, 95], [152, 70], [160, 50], // 13-16: Ring tilted right
+            [148, 136], [160, 112], [172, 92], [184, 74] // 17-20: Pinky extended right
+          ]
+        }
+      };
+
+      function renderHandSkeleton(key) {
+        const pose = handPoses[key] || handPoses['S'];
+        const coords = pose.coords;
+
+        if (skeletonSvg) {
+          skeletonSvg.style.transform = pose.transform;
+        }
+
+        // Render bones
+        if (handBones) {
+          let bonesHtml = '';
+          bonePairs.forEach(([i, j]) => {
+            const p1 = coords[i];
+            const p2 = coords[j];
+            bonesHtml += `<line x1="${p1[0]}" y1="${p1[1]}" x2="${p2[0]}" y2="${p2[1]}" stroke="${key === 'W' ? '#EFC07A' : key === 'S' ? '#2B7A66' : '#7FD1BA'}" stroke-width="2.5"/>`;
+          });
+          handBones.innerHTML = bonesHtml;
+        }
+
+        // Render 21 joints
+        if (handJoints) {
+          let jointsHtml = '';
+          coords.forEach(([x, y], idx) => {
+            const isTip = [4, 8, 12, 16, 20].includes(idx);
+            const r = isTip ? 4.5 : (idx === 0 ? 5.5 : 3.5);
+            const fill = isTip ? '#EFC07A' : (idx === 0 ? '#FFFFFF' : '#7FD1BA');
+            jointsHtml += `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="#0E1618" stroke-width="1.2"/>`;
+          });
+          handJoints.innerHTML = jointsHtml;
+        }
+
+        if (handThrust) {
+          handThrust.innerHTML = pose.thrustSvg || '';
+        }
+
+        // Update telemetry
+        if (gestureLabel) gestureLabel.textContent = pose.title;
+        if (actionPill) {
+          actionPill.textContent = pose.pill;
+          actionPill.style.background = pose.pillBg;
+        }
+        if (resultOutcome) resultOutcome.textContent = pose.outcome;
+        if (resultDesc) resultDesc.textContent = pose.desc;
+        if (pitchVal) pitchVal.textContent = (pose.pitch >= 0 ? '+' : '') + pose.pitch.toFixed(1) + '°';
+        if (pitchBar) pitchBar.style.width = Math.min(100, Math.max(0, 50 + pose.pitch * 1.5)) + '%';
+        if (rollVal) rollVal.textContent = (pose.roll >= 0 ? '+' : '') + pose.roll.toFixed(1) + '°';
+        if (rollBar) rollBar.style.width = Math.min(100, Math.max(0, 50 + pose.roll * 1.5)) + '%';
+        if (scanCode) scanCode.textContent = pose.scan;
+        if (hudOverlay) hudOverlay.textContent = `PITCH: ${pose.pitch.toFixed(1)}° • ROLL: ${pose.roll.toFixed(1)}° • KEY: ${key}`;
+        if (log) log.textContent = `>> Biometric Driver: Key [${key}] active. ${pose.outcome}. Latency: 14.2ms.`;
+
+        // Update button and card active states
+        wasdButtons.forEach(b => b.classList.toggle('active', b.dataset.key === key));
+        wasdCards.forEach(c => c.classList.toggle('active', c.dataset.key === key));
+      }
+
+      // Initial render with S
+      renderHandSkeleton('S');
+
+      // Click on toolbar buttons
+      wasdButtons.forEach(btn => {
         btn.addEventListener('click', () => {
-          keyBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
+          renderHandSkeleton(btn.dataset.key);
         });
       });
+
+      // Click on WASD cards
+      wasdCards.forEach(card => {
+        card.addEventListener('click', () => {
+          renderHandSkeleton(card.dataset.key);
+        });
+      });
+
+      // Keyboard keydown listener while modal is open
+      const keyHandler = (e) => {
+        const k = e.key.toUpperCase();
+        if (['W', 'A', 'S', 'D'].includes(k)) {
+          const consoleHand = document.getElementById('consoleHand');
+          if (consoleHand && consoleHand.closest('.project-modal.active')) {
+            renderHandSkeleton(k);
+          }
+        }
+      };
+      window.addEventListener('keydown', keyHandler);
     } catch (e) {
       console.error('handtracking init error:', e);
     }
   }
 
-  // 11. SafeDrop Merkle Preimage Interactivity
+  // 11. SafeDrop Merkle Tree Cryptographic Verification Engine with Live Cascade Simulation
   if (type === 'safedrop') {
     try {
-      const btnSafe = document.getElementById('btnSafeModeMitigated');
-      const btnVuln = document.getElementById('btnSafeModeVulnerable');
-      const btnTest = document.getElementById('btnSafeTestExploit');
-      const outcomeTitle = document.getElementById('safeOutcomeTitle');
-      const outcomeDesc = document.getElementById('safeOutcomeDesc');
-      const callout = document.getElementById('safeExploitCallout');
-      const safeLog = document.getElementById('safeLogBar');
+      const btnCascade = document.getElementById('btnSafeRunCascade');
+      const btnMitigated = document.getElementById('btnSafeModeMitigated');
+      const btnVulnerable = document.getElementById('btnSafeModeVulnerable');
+      const btnExploit = document.getElementById('btnSafeTestExploit');
+      const rootNode = document.getElementById('safeNodeRoot');
+      const rootText = document.getElementById('safeTextRoot');
+      const nodeH1 = document.getElementById('safeNodeH1');
+      const nodeH2 = document.getElementById('safeNodeH2');
+      const leaf2 = document.getElementById('safeLeaf2');
+      const textLeaf2 = document.getElementById('safeTextLeaf2');
+      const pulseParticle = document.getElementById('safePulseParticle');
+      const banner = document.getElementById('safeSimulationBanner');
+      const resultText = document.getElementById('safeVerifyResult');
+      const resultDesc = document.getElementById('safeVerifyDesc');
+      const proofTag = document.getElementById('safeProofTag');
+      const log = document.getElementById('safeLog');
+
       let isMitigated = true;
 
-      if (btnSafe && btnVuln) {
-        btnSafe.addEventListener('click', () => {
-          isMitigated = true;
-          btnSafe.classList.add('active');
-          btnVuln.classList.remove('active');
-          if (outcomeTitle) {
-            outcomeTitle.textContent = 'PROTECTED: Domain Separation Active';
-            outcomeTitle.style.color = '#2B7A66';
-          }
-          if (outcomeDesc) outcomeDesc.textContent = 'Leaves prefixed with 0x00 and internal hashes with 0x01. Preimage attack is cryptographically impossible.';
-          if (callout) callout.style.display = 'none';
-          if (safeLog) safeLog.textContent = '>> SafeDrop: Domain separation prefixes & 32-byte leaf padding enabled.';
-        });
+      function resetTreeVisuals() {
+        if (rootNode) {
+          rootNode.setAttribute('stroke', '#7FD1BA');
+          rootNode.setAttribute('fill', '#1A2B28');
+        }
+        if (rootText) {
+          rootText.textContent = 'ROOT: 0x7f4a...9c12';
+          rootText.setAttribute('fill', '#7FD1BA');
+        }
+        if (nodeH1) nodeH1.setAttribute('stroke', '#2B7A66');
+        if (nodeH2) nodeH2.setAttribute('stroke', '#2B7A66');
+        if (leaf2) {
+          leaf2.setAttribute('stroke', '#2B7A66');
+          leaf2.setAttribute('fill', '#162724');
+        }
+        if (textLeaf2) textLeaf2.textContent = 'B: 250 TKN';
+        if (pulseParticle) pulseParticle.setAttribute('opacity', '0');
+      }
 
-        btnVuln.addEventListener('click', () => {
-          isMitigated = false;
-          btnVuln.classList.add('active');
-          btnSafe.classList.remove('active');
-          if (outcomeTitle) {
-            outcomeTitle.textContent = '⚠️ VULNERABLE: Naive Unprefixed Merkle Tree';
-            outcomeTitle.style.color = '#B83A4B';
+      function runVerificationCascade() {
+        resetTreeVisuals();
+        if (banner) banner.textContent = 'CASCADE: 1/3 HASHING LEAF TRANSACTIONS...';
+        if (log) log.textContent = '>> SafeDrop Simulation: Computing SHA-256 digests for Leaves A, B, C, D...';
+
+        // Step 1: Leaves pulse
+        setTimeout(() => {
+          if (banner) banner.textContent = 'CASCADE: 2/3 COMPUTING INTERMEDIATE PARENTS H1 & H2...';
+          if (nodeH1) nodeH1.setAttribute('stroke', '#EFC07A');
+          if (nodeH2) nodeH2.setAttribute('stroke', '#EFC07A');
+          if (pulseParticle) {
+            pulseParticle.setAttribute('cx', '80');
+            pulseParticle.setAttribute('cy', '85');
+            pulseParticle.setAttribute('opacity', '1');
+            pulseParticle.setAttribute('fill', '#EFC07A');
           }
-          if (outcomeDesc) outcomeDesc.textContent = 'Internal 64-byte hashes can be parsed as 32-byte address + 32-byte amount leaf pairs by secondary preimage forgery.';
-          if (callout) callout.style.display = 'none';
-          if (safeLog) safeLog.textContent = '>> SafeDrop Warning: System in naive mode. Vulnerable to secondary preimage airdrop drainage.';
+          if (log) log.textContent = '>> SafeDrop Simulation: H(0x01 || H_A || H_B) and H(0x01 || H_C || H_D) assembled.';
+        }, 450);
+
+        // Step 2: Intermediate to Root
+        setTimeout(() => {
+          if (banner) banner.textContent = 'CASCADE: 3/3 PROPAGATING PROOF TO MERKLE ROOT...';
+          if (pulseParticle) {
+            pulseParticle.setAttribute('cx', '160');
+            pulseParticle.setAttribute('cy', '25');
+          }
+        }, 900);
+
+        // Step 3: Complete verification
+        setTimeout(() => {
+          if (rootNode) {
+            rootNode.setAttribute('stroke', '#7FD1BA');
+            rootNode.setAttribute('fill', '#16382E');
+          }
+          if (rootText) {
+            rootText.textContent = 'ROOT VERIFIED: 0x7f4a...9c12';
+            rootText.setAttribute('fill', '#7FD1BA');
+          }
+          if (pulseParticle) pulseParticle.setAttribute('opacity', '0');
+          if (banner) banner.textContent = 'CASCADE COMPLETE: 100% CRYPTOGRAPHIC MATCH CONFIRMED';
+          if (resultText) {
+            resultText.textContent = '✓ MERKLE ROOT VALID';
+            resultText.style.color = '#2B7A66';
+          }
+          if (resultDesc) resultDesc.textContent = 'Cryptographic proof verified against on-chain root in 28,400 gas. Claim authorized.';
+          if (log) log.textContent = '>> SafeDrop Engine: Merkle verification cascade confirmed valid on-chain root.';
+        }, 1350);
+      }
+
+      function runPreimageExploitSimulation() {
+        resetTreeVisuals();
+        if (banner) banner.textContent = 'ATTACK: INJECTING 64-BYTE PREIMAGE COLLISION IN LEAF B...';
+        if (leaf2) {
+          leaf2.setAttribute('stroke', '#B83A4B');
+          leaf2.setAttribute('fill', '#3A141A');
+        }
+        if (textLeaf2) textLeaf2.textContent = 'B: 99,999 TKN';
+        if (log) log.textContent = '>> Exploit Simulator: Malicious caller attempting 64-byte intermediate node collision.';
+
+        setTimeout(() => {
+          if (nodeH1) nodeH1.setAttribute('stroke', '#B83A4B');
+          if (banner) banner.textContent = 'ATTACK: PROPAGATING MALICIOUS HASH TO ROOT...';
+          if (pulseParticle) {
+            pulseParticle.setAttribute('cx', '160');
+            pulseParticle.setAttribute('cy', '25');
+            pulseParticle.setAttribute('opacity', '1');
+            pulseParticle.setAttribute('fill', '#B83A4B');
+          }
+        }, 500);
+
+        setTimeout(() => {
+          if (isMitigated) {
+            // Mitigated: Blocked!
+            if (rootNode) {
+              rootNode.setAttribute('stroke', '#2B7A66');
+              rootNode.setAttribute('fill', '#16382E');
+            }
+            if (rootText) {
+              rootText.textContent = 'SAFE: ROOT PROTECTED (0x7f4a)';
+              rootText.setAttribute('fill', '#7FD1BA');
+            }
+            if (banner) banner.textContent = 'ATTACK REJECTED: SAFEDROP 0x01 PREFIX NEUTRALIZED EXPLOIT';
+            if (resultText) {
+              resultText.textContent = '✓ EXPLOIT REJECTED (SAFE)';
+              resultText.style.color = '#2B7A66';
+            }
+            if (resultDesc) resultDesc.textContent = 'SafeDrop domain prefixing forced distinct intermediate hashes. Smart contract aborted malicious transaction.';
+            if (log) log.textContent = '>> SafeDrop Shield: Preimage attack thwarted. Strict 0x00/0x01 domain separation active.';
+          } else {
+            // Vulnerable: Exploit succeeds!
+            if (rootNode) {
+              rootNode.setAttribute('stroke', '#B83A4B');
+              rootNode.setAttribute('fill', '#3A141A');
+            }
+            if (rootText) {
+              rootText.textContent = 'ALERT: ROOT COMPROMISED!';
+              rootText.setAttribute('fill', '#FFAAB4');
+            }
+            if (banner) banner.textContent = 'VULNERABILITY DETECTED: UNPREFIXED ROOT ACCEPTED FORGED LEAF';
+            if (resultText) {
+              resultText.textContent = '✕ ATTACK SUCCEEDED (UNPROTECTED)';
+              resultText.style.color = '#B83A4B';
+            }
+            if (resultDesc) resultDesc.textContent = 'Unprefixed 64-byte node interpreted as leaf. Drain of 99,999 tokens permitted on unmitigated contract!';
+            if (log) log.textContent = '>> Security Warning: Vulnerable unprefixed tree accepted forged second preimage.';
+          }
+        }, 1100);
+      }
+
+      if (btnCascade) btnCascade.addEventListener('click', runVerificationCascade);
+      if (btnExploit) btnExploit.addEventListener('click', runPreimageExploitSimulation);
+
+      if (btnMitigated) {
+        btnMitigated.addEventListener('click', () => {
+          isMitigated = true;
+          btnMitigated.classList.add('active');
+          if (btnVulnerable) btnVulnerable.classList.remove('active');
+          if (proofTag) proofTag.textContent = 'SafeDrop Protected (0x01 Prefixed)';
+          resetTreeVisuals();
+          if (banner) banner.textContent = 'MODE: PROTECTED (SAFEDROP PREFIXING ACTIVE)';
         });
       }
 
-      if (btnTest) {
-        btnTest.addEventListener('click', () => {
-          if (callout) callout.style.display = 'block';
-          if (isMitigated) {
-            callout.querySelector('text').textContent = 'ATTACK BLOCKED: Secondary Preimage Rejected by Prefix Rules';
-            callout.querySelector('rect').setAttribute('fill', 'rgba(43, 122, 102, 0.95)');
-            if (safeLog) safeLog.textContent = '>> Cryptographic Verification: Exploit payload rejected! Merkle root recomputed safely.';
-          } else {
-            callout.querySelector('text').textContent = '⚠️ EXPLOIT SUCCEEDED: 64-Byte Internal Hash Accepted as Valid Claim!';
-            callout.querySelector('rect').setAttribute('fill', 'rgba(184, 58, 75, 0.95)');
-            if (safeLog) safeLog.textContent = '>> VULNERABILITY EXPOSED: Unauthorized claim accepted due to missing domain separation.';
-          }
+      if (btnVulnerable) {
+        btnVulnerable.addEventListener('click', () => {
+          isMitigated = false;
+          btnVulnerable.classList.add('active');
+          if (btnMitigated) btnMitigated.classList.remove('active');
+          if (proofTag) proofTag.textContent = 'Vulnerable (Raw 64-byte Tree)';
+          resetTreeVisuals();
+          if (banner) banner.textContent = 'MODE: VULNERABLE (NO DOMAIN SEPARATION)';
         });
       }
     } catch (e) {
@@ -2564,8 +3057,7 @@ function attachConsoleInteractivity(type) {
     }
   }
 
-  // 12. Looper AI Desktop Studio
-  if (type === 'looper') {
+if (type === 'looper') {
     try {
       const btnRun = document.getElementById('btnLooperRun');
       const btnModel = document.getElementById('btnLooperModel');
@@ -2692,43 +3184,388 @@ function attachConsoleInteractivity(type) {
   }
 
   // 17. Three.js Game Grid Coordinate Raycasting
+    // 17. Three.js Isometric RPG Engine — Interactive 3D Canvas Viewport
   if (type === 'threejsgame') {
     try {
-      const btnA = document.getElementById('btnThreeTileA');
-      const btnB = document.getElementById('btnThreeTileB');
-      const tileText = document.getElementById('threeTileText');
+      const canvas = document.getElementById('threeInteractiveCanvas');
+      const wrap = document.getElementById('threeCanvasWrap');
+      const rotHud = document.getElementById('threeRotHud');
+      const polyCount = document.getElementById('threePolyCount');
+      const shadingText = document.getElementById('threeShadingText');
+      const objLabel = document.getElementById('threeObjLabel');
+      const raycastText = document.getElementById('threeTileText');
+      const log = document.getElementById('threeLog');
 
-      if (btnA) btnA.addEventListener('click', () => {
-        btnA.classList.add('active');
-        if (btnB) btnB.classList.remove('active');
-        if (tileText) tileText.textContent = 'Vector3(2.0, 0.0, 3.0)';
-      });
-      if (btnB) btnB.addEventListener('click', () => {
-        btnB.classList.add('active');
-        if (btnA) btnA.classList.remove('active');
-        if (tileText) tileText.textContent = 'Vector3(4.0, 0.0, 1.0)';
-      });
+      const btnCube = document.getElementById('btnThreeObjCube');
+      const btnGem = document.getElementById('btnThreeObjGem');
+      const btnIcosa = document.getElementById('btnThreeObjIcosa');
+      const btnWire = document.getElementById('btnThreeWireframe');
+      const btnAuto = document.getElementById('btnThreeAutoRotate');
+      const btnReset = document.getElementById('btnThreeResetCam');
+
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+
+      // Geometries (Vertices & Faces)
+      let currentShape = 'cube';
+      let wireframeOnly = false;
+      let autoRotate = true;
+
+      // Camera & Rotation State
+      let rotX = 0.45; // ~25 deg
+      let rotY = 0.78; // ~45 deg
+      let zoom = 120;
+      let isDragging = false;
+      let lastMouseX = 0;
+      let lastMouseY = 0;
+      let animId = null;
+
+      function getGeometry(shape) {
+        if (shape === 'cube') {
+          // Voxel Crate (Cube)
+          const v = [
+            [-0.7, -0.7, -0.7], [0.7, -0.7, -0.7], [0.7, 0.7, -0.7], [-0.7, 0.7, -0.7],
+            [-0.7, -0.7,  0.7], [0.7, -0.7,  0.7], [0.7, 0.7,  0.7], [-0.7, 0.7,  0.7]
+          ];
+          const faces = [
+            [0, 1, 2, 3, '#2B7A66'], // Front
+            [5, 4, 7, 6, '#1F5A4B'], // Back
+            [4, 0, 3, 7, '#388F78'], // Left
+            [1, 5, 6, 2, '#246958'], // Right
+            [4, 5, 1, 0, '#46AA90'], // Top
+            [3, 2, 6, 7, '#153C32']  // Bottom
+          ];
+          return { v, faces, polys: '12 Triangles (6 Quads)', label: 'Voxel Crate' };
+        } else if (shape === 'gem') {
+          // Faceted Gem / Octahedron
+          const v = [
+            [0, 1.1, 0], [0, -1.1, 0],
+            [-0.8, 0, 0], [0.8, 0, 0], [0, 0, -0.8], [0, 0, 0.8]
+          ];
+          const faces = [
+            [0, 2, 5, '#EFC07A'], [0, 5, 3, '#E5AF61'], [0, 3, 4, '#D99E4A'], [0, 4, 2, '#C88D37'],
+            [1, 5, 2, '#B87B25'], [1, 3, 5, '#A46B1C'], [1, 4, 3, '#905B13'], [1, 2, 4, '#7C4C0B']
+          ];
+          return { v, faces, polys: '8 Triangles (Octahedron)', label: 'Faceted Gem' };
+        } else {
+          // Icosahedron
+          const phi = (1 + Math.sqrt(5)) / 2;
+          const scale = 0.65;
+          const v = [
+            [-1,  phi, 0], [ 1,  phi, 0], [-1, -phi, 0], [ 1, -phi, 0],
+            [ 0, -1,  phi], [ 0,  1,  phi], [ 0, -1, -phi], [ 0,  1, -phi],
+            [ phi, 0, -1], [ phi, 0,  1], [-phi, 0, -1], [-phi, 0,  1]
+          ].map(pt => [pt[0] * scale, pt[1] * scale, pt[2] * scale]);
+
+          const faces = [
+            [0, 11, 5, '#5B2A4A'], [0, 5, 1, '#72355D'], [0, 1, 7, '#8A4171'], [0, 7, 10, '#A14D85'], [0, 10, 11, '#5B2A4A'],
+            [1, 5, 9, '#72355D'], [5, 11, 4, '#8A4171'], [11, 10, 2, '#A14D85'], [10, 7, 6, '#5B2A4A'], [7, 1, 8, '#72355D'],
+            [3, 9, 4, '#8A4171'], [3, 4, 2, '#A14D85'], [3, 2, 6, '#5B2A4A'], [3, 6, 8, '#72355D'], [3, 8, 9, '#8A4171'],
+            [4, 9, 5, '#A14D85'], [2, 4, 11, '#5B2A4A'], [6, 2, 10, '#72355D'], [8, 6, 7, '#8A4171'], [9, 8, 1, '#A14D85']
+          ];
+          return { v, faces, polys: '20 Triangles (Icosahedron)', label: 'Icosahedron Mesh' };
+        }
+      }
+
+      function renderFrame() {
+        if (!canvas) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Dark tech grid floor in background
+        ctx.strokeStyle = 'rgba(43, 122, 102, 0.15)';
+        ctx.lineWidth = 1;
+        const cyFloor = canvas.height * 0.75;
+        for (let x = -200; x <= 200; x += 40) {
+          ctx.beginPath();
+          ctx.moveTo(canvas.width / 2 + x, cyFloor - 20);
+          ctx.lineTo(canvas.width / 2 + x * 2.2, canvas.height);
+          ctx.stroke();
+        }
+
+        const geo = getGeometry(currentShape);
+        const cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+        const cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+
+        // Project vertices
+        const projected = geo.v.map(pt => {
+          // Rotate Y
+          const x1 = pt[0] * cosY - pt[2] * sinY;
+          const z1 = pt[0] * sinY + pt[2] * cosY;
+          // Rotate X
+          const y2 = pt[1] * cosX - z1 * sinX;
+          const z2 = pt[1] * sinX + z1 * cosX;
+
+          // Camera perspective
+          const dist = 3.2;
+          const fov = zoom / (dist + z2);
+          const px = canvas.width / 2 + x1 * fov;
+          const py = canvas.height / 2 - y2 * fov;
+          return { x: px, y: py, z: z2 };
+        });
+
+        // Compute face normals and sort by depth (Painter's algorithm)
+        const faceData = geo.faces.map(face => {
+          const p0 = projected[face[0]];
+          const p1 = projected[face[1]];
+          const p2 = projected[face[2]];
+
+          // Surface normal in 2D cross product for winding / culling
+          const winding = (p1.x - p0.x) * (p2.y - p0.y) - (p1.y - p0.y) * (p2.x - p0.x);
+
+          // Average Z depth
+          let avgZ = 0;
+          const indices = face.slice(0, face.length - 1);
+          indices.forEach(idx => avgZ += projected[idx].z);
+          avgZ /= indices.length;
+
+          return {
+            face,
+            indices,
+            winding,
+            avgZ,
+            color: face[face.length - 1]
+          };
+        });
+
+        faceData.sort((a, b) => b.avgZ - a.avgZ);
+
+        // Draw faces
+        faceData.forEach(f => {
+          if (f.winding < 0 && !wireframeOnly) return; // Backface culling
+
+          ctx.beginPath();
+          f.indices.forEach((idx, i) => {
+            const p = projected[idx];
+            if (i === 0) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          });
+          ctx.closePath();
+
+          if (wireframeOnly) {
+            ctx.strokeStyle = '#7FD1BA';
+            ctx.lineWidth = 1.6;
+            ctx.stroke();
+          } else {
+            // Lambertian shading calculation
+            ctx.fillStyle = f.color;
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.25)';
+            ctx.lineWidth = 1.2;
+            ctx.stroke();
+          }
+        });
+
+        // Auto-rotation increment
+        if (autoRotate && !isDragging) {
+          rotY += 0.012;
+          rotX = 0.4 + Math.sin(Date.now() * 0.001) * 0.08;
+        }
+
+        // Update HUD
+        const degX = Math.round((rotX * 180) / Math.PI) % 360;
+        const degY = Math.round((rotY * 180) / Math.PI) % 360;
+        if (rotHud) rotHud.textContent = `X: ${degX}° Y: ${degY}°`;
+
+        animId = requestAnimationFrame(renderFrame);
+      }
+
+      // Start render loop
+      animId = requestAnimationFrame(renderFrame);
+
+      // Mouse drag controls
+      if (wrap) {
+        wrap.addEventListener('mousedown', (e) => {
+          isDragging = true;
+          lastMouseX = e.clientX;
+          lastMouseY = e.clientY;
+          wrap.style.cursor = 'grabbing';
+        });
+
+        window.addEventListener('mousemove', (e) => {
+          if (!isDragging) return;
+          const dx = e.clientX - lastMouseX;
+          const dy = e.clientY - lastMouseY;
+          lastMouseX = e.clientX;
+          lastMouseY = e.clientY;
+
+          rotY += dx * 0.012;
+          rotX -= dy * 0.012;
+
+          if (raycastText) {
+            raycastText.textContent = `Vector3(${(rotX * 2).toFixed(1)}, ${(zoom / 50).toFixed(1)}, ${(rotY * 2).toFixed(1)})`;
+          }
+        });
+
+        window.addEventListener('mouseup', () => {
+          if (isDragging) {
+            isDragging = false;
+            if (wrap) wrap.style.cursor = 'grab';
+          }
+        });
+
+        wrap.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          zoom = Math.max(60, Math.min(220, zoom - e.deltaY * 0.2));
+        });
+      }
+
+      // Geometry buttons
+      function setShape(shape, btn) {
+        currentShape = shape;
+        [btnCube, btnGem, btnIcosa].forEach(b => b && b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        const g = getGeometry(shape);
+        if (polyCount) polyCount.textContent = g.polys;
+        if (objLabel) objLabel.textContent = g.label;
+        if (log) log.textContent = `>> Three.js Engine: Switched geometry to ${g.label} (${g.polys}).`;
+      }
+
+      if (btnCube) btnCube.addEventListener('click', () => setShape('cube', btnCube));
+      if (btnGem) btnGem.addEventListener('click', () => setShape('gem', btnGem));
+      if (btnIcosa) btnIcosa.addEventListener('click', () => setShape('icosa', btnIcosa));
+
+      if (btnWire) {
+        btnWire.addEventListener('click', () => {
+          wireframeOnly = !wireframeOnly;
+          btnWire.classList.toggle('active', wireframeOnly);
+          btnWire.textContent = wireframeOnly ? 'Wireframe: ON' : 'Wireframe: OFF';
+          if (shadingText) shadingText.textContent = wireframeOnly ? 'WebGL Wireframe Mesh' : 'Lambertian Flat Shading';
+        });
+      }
+
+      if (btnAuto) {
+        btnAuto.addEventListener('click', () => {
+          autoRotate = !autoRotate;
+          btnAuto.classList.toggle('active', autoRotate);
+          btnAuto.textContent = autoRotate ? 'Auto-Spin: ON' : 'Auto-Spin: OFF';
+        });
+      }
+
+      if (btnReset) {
+        btnReset.addEventListener('click', () => {
+          rotX = 0.45;
+          rotY = 0.78;
+          zoom = 120;
+          if (log) log.textContent = '>> Three.js Engine: Camera view reset to isometric default.';
+        });
+      }
     } catch (e) {
-      console.error('threejsgame init error:', e);
+      console.error('threejs init error:', e);
     }
   }
 
-  // 18. API POOL Key Rotation
+  // 18. API POOL Security Vault — Animated Pipeline Dispatch to Portfolio Projects
   if (type === 'apipool') {
     try {
+      const btnDispatch = document.getElementById('btnApiDispatch');
+      const btnAutoStream = document.getElementById('btnApiAutoStream');
       const btnRotate = document.getElementById('btnApiRotate');
       const slotEl = document.getElementById('apiKeySlot');
-      let slot = 2;
-      if (btnRotate) {
-        btnRotate.addEventListener('click', () => {
-          slot = (slot % 4) + 1;
-          if (slotEl) slotEl.textContent = `Slot #${slot} (sk-...${slot}8b)`;
+      const activeKeyDisplay = document.getElementById('apiActiveKeyDisplay');
+      const dispatchedTarget = document.getElementById('apiDispatchedTarget');
+      const routedProjectName = document.getElementById('apiRoutedProjectName');
+      const routedStatus = document.getElementById('apiRoutedStatus');
+      const rateDisplay = document.getElementById('apiRateDisplay');
+      const pipelineStatus = document.getElementById('apiPipelineStatus');
+      const gatewayNode = document.getElementById('apiGatewayNode');
+      const projectNode = document.getElementById('apiProjectNode');
+      const log = document.getElementById('apiLog');
+      const routeBtns = document.querySelectorAll('#consoleApipool [data-routed]');
+
+      let currentSlot = 2;
+      let activeTargetProject = 'ColdBrief AI';
+      let autoStreamActive = true;
+      let autoStreamTimer = null;
+      let reqCounter = 18;
+
+      const projectConfigs = {
+        'coldbrief': { name: 'ColdBrief AI', port: 'Port 3000', desc: 'AI Morning Digest Generator' },
+        'covidxray': { name: 'COVID-19 Vision', port: 'Port 8000', desc: 'MobileNetV2 DICOM Pipeline' },
+        'campuspulse': { name: 'CampusPulse', port: 'Port 5000', desc: 'Transit & Event Realtime Feed' },
+        'agrotech': { name: 'AgroTech', port: 'Port 8080', desc: 'IoT Soil & Crop Sensor Telemetry' }
+      };
+
+      function dispatchApiPacket() {
+        reqCounter = (reqCounter % 58) + 1;
+        const latency = Math.floor(Math.random() * 7) + 12; // 12-18ms
+        const payloadSize = 1000 + Math.floor(Math.random() * 800); // ~1400 bytes
+
+        // Flash Gateway Node
+        if (gatewayNode) {
+          gatewayNode.style.transform = 'scale(1.04)';
+          gatewayNode.style.borderColor = '#7FD1BA';
+          setTimeout(() => {
+            gatewayNode.style.transform = 'scale(1)';
+            gatewayNode.style.borderColor = 'rgba(239,192,122,0.7)';
+          }, 250);
+        }
+
+        // Flash Project Node
+        setTimeout(() => {
+          if (projectNode) {
+            projectNode.style.transform = 'scale(1.05)';
+            projectNode.style.borderColor = '#EFC07A';
+            projectNode.style.boxShadow = '0 0 16px rgba(127,209,186,0.5)';
+            setTimeout(() => {
+              projectNode.style.transform = 'scale(1)';
+              projectNode.style.borderColor = '#7FD1BA';
+              projectNode.style.boxShadow = 'none';
+            }, 300);
+          }
+
+          if (routedStatus) routedStatus.textContent = `200 OK • ${latency}ms Latency`;
+          if (rateDisplay) rateDisplay.textContent = `${reqCounter} / 60 RPM • PASS`;
+          if (pipelineStatus) pipelineStatus.textContent = `Dispatched to ${activeTargetProject} (${latency}ms)`;
+          if (log) log.textContent = `>> API POOL: Bearer packet [Slot #${currentSlot}] routed to ${activeTargetProject} (${payloadSize} bytes, ${latency}ms). 200 OK.`;
+        }, 450);
+      }
+
+      function rotateKeyPool() {
+        currentSlot = (currentSlot % 4) + 1;
+        const keyHash = `sk-...${currentSlot * 23}b`;
+        if (slotEl) slotEl.textContent = `Slot #${currentSlot} (${keyHash})`;
+        if (activeKeyDisplay) activeKeyDisplay.textContent = `Slot #${currentSlot} (${keyHash})`;
+        if (log) log.textContent = `>> API POOL: Credential Vault rotated to Slot #${currentSlot} (${keyHash}). Zero downtime.`;
+      }
+
+      if (btnDispatch) btnDispatch.addEventListener('click', dispatchApiPacket);
+      if (btnRotate) btnRotate.addEventListener('click', rotateKeyPool);
+
+      routeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          routeBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const cfg = projectConfigs[btn.dataset.routed];
+          if (cfg) {
+            activeTargetProject = cfg.name;
+            if (routedProjectName) routedProjectName.textContent = cfg.name;
+            if (dispatchedTarget) dispatchedTarget.textContent = `${cfg.name} (${cfg.port})`;
+            dispatchApiPacket();
+          }
+        });
+      });
+
+      if (btnAutoStream) {
+        btnAutoStream.addEventListener('click', () => {
+          autoStreamActive = !autoStreamActive;
+          btnAutoStream.classList.toggle('active', autoStreamActive);
+          btnAutoStream.textContent = autoStreamActive ? 'Auto-Stream: ON' : 'Auto-Stream: OFF';
+          if (autoStreamActive) {
+            if (!autoStreamTimer) autoStreamTimer = setInterval(dispatchApiPacket, 1800);
+          } else {
+            clearInterval(autoStreamTimer);
+            autoStreamTimer = null;
+          }
         });
       }
+
+      // Initial auto-stream timer
+      autoStreamTimer = setInterval(dispatchApiPacket, 2000);
     } catch (e) {
       console.error('apipool init error:', e);
     }
   }
+
 }
 
 
