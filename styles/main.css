@@ -632,6 +632,65 @@ p {
 }
 
 /* ==========================================================================
+   Innovator Principles & Mindset Blueprint
+   ========================================================================== */
+.innovator-principles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+  align-items: stretch;
+}
+
+.principle-card {
+  background: var(--paper-elevated, #FFFFFF);
+  border: 1px solid var(--line, rgba(21, 48, 58, 0.14));
+  border-radius: var(--radius-md, 12px);
+  padding: 24px;
+  box-shadow: 0 4px 16px -6px rgba(21, 48, 58, 0.06);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.principle-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 28px -10px rgba(91, 42, 74, 0.15);
+  border-color: rgba(91, 42, 74, 0.3);
+}
+
+.principle-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.principle-num {
+  font: 800 0.85rem var(--mono, monospace);
+  color: var(--plum, #5B2A4A);
+  background: rgba(91, 42, 74, 0.08);
+  border: 1px solid rgba(91, 42, 74, 0.2);
+  padding: 3px 8px;
+  border-radius: 6px;
+  line-height: 1;
+}
+
+.principle-card h4 {
+  font: 700 1.05rem var(--ui);
+  color: var(--ink, #15303A);
+  margin: 0;
+  line-height: 1.25;
+}
+
+.principle-card p {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--ink2, #4A6168);
+  margin: 0;
+}
+
+/* ==========================================================================
    Multi-Domain Spectrum Section (Diverse Disciplines)
    ========================================================================== */
 .domain-chips {
