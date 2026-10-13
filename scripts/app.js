@@ -3591,6 +3591,8 @@ function initPlayableChessEngine() {
     'r': '♜', 'n': '♞', 'b': '♝', 'q': '♛', 'k': '♚', 'p': '♟'
   };
 
+  const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
   let board = [
     ['r', 'n', 'b', 'q', 'k', 'b', 'n', 'r'],
     ['p', 'p', 'p', 'p', 'p', 'p', 'p', 'p'],
@@ -3604,14 +3606,300 @@ function initPlayableChessEngine() {
 
   let currentTurn = 'w'; // 'w' | 'b'
   let selectedSquare = null; // {r, c}
-  let legalMoves = []; // array of {r, c, isEnPassant, isCapture}
+  let legalMoves = []; // array of {r, c, isEnPassant, isCapture, isCastleKS, isCastleQS}
   let enPassantTarget = null; // {r, c} passed square eligible for en passant
   let moveCount = 1;
   let capturedByWhite = [];
   let capturedByBlack = [];
+  let lastMove = null; // { from: {r, c}, to: {r, c} }
+  let gameOver = false;
+  let hasMoved = {
+    wK: false, wR_ks: false, wR_qs: false,
+    bK: false, bR_ks: false, bR_qs: false
+  };
+
+  function isOpponentPiece(p, isWhite) {
+    if (p === '.') return false;
+    return isWhite ? p === p.toLowerCase() : p === p.toUpperCase();
+  }
+
+  function findKing(color, b = board) {
+    const targetKing = color === 'w' ? 'K' : 'k';
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        if (b[r][c] === targetKing) return { r, c };
+      }
+    }
+    return null;
+  }
+
+  function isSquareAttacked(r, c, byColor, b = board) {
+    const isAttackerWhite = byColor === 'w';
+
+    // 1. Pawns attacking (r, c)
+    const pawnRow = isAttackerWhite ? r + 1 : r - 1;
+    const targetPawn = isAttackerWhite ? 'P' : 'p';
+    if (pawnRow >= 0 && pawnRow < 8) {
+      if (c - 1 >= 0 && b[pawnRow][c - 1] === targetPawn) return true;
+      if (c + 1 < 8 && b[pawnRow][c + 1] === targetPawn) return true;
+    }
+
+    // 2. Knights attacking (r, c)
+    const targetKnight = isAttackerWhite ? 'N' : 'n';
+    const knightOffsets = [
+      [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+      [1, -2], [1, 2], [2, -1], [2, 1]
+    ];
+    for (const [dr, dc] of knightOffsets) {
+      const nr = r + dr, nc = c + dc;
+      if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+        if (b[nr][nc] === targetKnight) return true;
+      }
+    }
+
+    // 3. Kings attacking (r, c)
+    const targetKing = isAttackerWhite ? 'K' : 'k';
+    for (let dr = -1; dr <= 1; dr++) {
+      for (let dc = -1; dc <= 1; dc++) {
+        if (dr === 0 && dc === 0) continue;
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          if (b[nr][nc] === targetKing) return true;
+        }
+      }
+    }
+
+    // 4. Straight rays (Rook / Queen)
+    const straightDirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+    const targetRook = isAttackerWhite ? 'R' : 'r';
+    const targetQueen = isAttackerWhite ? 'Q' : 'q';
+    for (const [dr, dc] of straightDirs) {
+      let step = 1;
+      while (true) {
+        const nr = r + dr * step;
+        const nc = c + dc * step;
+        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) break;
+        const p = b[nr][nc];
+        if (p !== '.') {
+          if (p === targetRook || p === targetQueen) return true;
+          break; // blocked by any piece
+        }
+        step++;
+      }
+    }
+
+    // 5. Diagonal rays (Bishop / Queen)
+    const diagDirs = [[-1, -1], [-1, 1], [1, -1], [1, 1]];
+    const targetBishop = isAttackerWhite ? 'B' : 'b';
+    for (const [dr, dc] of diagDirs) {
+      let step = 1;
+      while (true) {
+        const nr = r + dr * step;
+        const nc = c + dc * step;
+        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) break;
+        const p = b[nr][nc];
+        if (p !== '.') {
+          if (p === targetBishop || p === targetQueen) return true;
+          break; // blocked by any piece
+        }
+        step++;
+      }
+    }
+
+    return false;
+  }
+
+  function isKingInCheck(color, b = board) {
+    const kPos = findKing(color, b);
+    if (!kPos) return false;
+    const opponent = color === 'w' ? 'b' : 'w';
+    return isSquareAttacked(kPos.r, kPos.c, opponent, b);
+  }
+
+  function getCandidateMoves(r, c, b = board) {
+    const piece = b[r][c];
+    if (piece === '.') return [];
+    const isWhite = piece === piece.toUpperCase();
+    const moves = [];
+
+    // PAWN
+    if (piece.toLowerCase() === 'p') {
+      const dir = isWhite ? -1 : 1;
+      const startRank = isWhite ? 6 : 1;
+
+      // 1-step forward
+      if (r + dir >= 0 && r + dir < 8 && b[r + dir][c] === '.') {
+        moves.push({ r: r + dir, c: c, isCapture: false });
+        // 2-step forward
+        if (r === startRank && b[r + 2 * dir][c] === '.') {
+          moves.push({ r: r + 2 * dir, c: c, isCapture: false, isPawnDouble: true });
+        }
+      }
+
+      // Diagonal captures
+      [-1, 1].forEach(dc => {
+        const nr = r + dir;
+        const nc = c + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          const target = b[nr][nc];
+          if (target !== '.' && isOpponentPiece(target, isWhite)) {
+            if (target.toLowerCase() !== 'k') {
+              moves.push({ r: nr, c: nc, isCapture: true });
+            }
+          }
+          // En Passant
+          if (enPassantTarget && enPassantTarget.r === nr && enPassantTarget.c === nc) {
+            moves.push({ r: nr, c: nc, isCapture: true, isEnPassant: true });
+          }
+        }
+      });
+    }
+
+    // KNIGHT
+    if (piece.toLowerCase() === 'n') {
+      const jumps = [
+        [-2, -1], [-2, 1], [-1, -2], [-1, 2],
+        [1, -2], [1, 2], [2, -1], [2, 1]
+      ];
+      jumps.forEach(([dr, dc]) => {
+        const nr = r + dr, nc = c + dc;
+        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+          const target = b[nr][nc];
+          if (target === '.') {
+            moves.push({ r: nr, c: nc, isCapture: false });
+          } else if (isOpponentPiece(target, isWhite) && target.toLowerCase() !== 'k') {
+            moves.push({ r: nr, c: nc, isCapture: true });
+          }
+        }
+      });
+    }
+
+    // BISHOP / ROOK / QUEEN
+    const dirs = [];
+    if (piece.toLowerCase() === 'b' || piece.toLowerCase() === 'q') {
+      dirs.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
+    }
+    if (piece.toLowerCase() === 'r' || piece.toLowerCase() === 'q') {
+      dirs.push([-1, 0], [1, 0], [0, -1], [0, 1]);
+    }
+    dirs.forEach(([dr, dc]) => {
+      let step = 1;
+      while (true) {
+        const nr = r + dr * step;
+        const nc = c + dc * step;
+        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) break;
+        const target = b[nr][nc];
+        if (target === '.') {
+          moves.push({ r: nr, c: nc, isCapture: false });
+        } else {
+          if (isOpponentPiece(target, isWhite) && target.toLowerCase() !== 'k') {
+            moves.push({ r: nr, c: nc, isCapture: true });
+          }
+          break;
+        }
+        step++;
+      }
+    });
+
+    // KING
+    if (piece.toLowerCase() === 'k') {
+      for (let dr = -1; dr <= 1; dr++) {
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          const nr = r + dr, nc = c + dc;
+          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
+            const target = b[nr][nc];
+            if (target === '.') {
+              moves.push({ r: nr, c: nc, isCapture: false });
+            } else if (isOpponentPiece(target, isWhite) && target.toLowerCase() !== 'k') {
+              moves.push({ r: nr, c: nc, isCapture: true });
+            }
+          }
+        }
+      }
+
+      // Castling
+      const enemy = isWhite ? 'b' : 'w';
+      const rank = isWhite ? 7 : 0;
+      if (r === rank && c === 4 && !isSquareAttacked(rank, 4, enemy, b)) {
+        // Kingside castling (O-O)
+        const canCastleKS = isWhite ? (!hasMoved.wK && !hasMoved.wR_ks) : (!hasMoved.bK && !hasMoved.bR_ks);
+        if (canCastleKS && b[rank][5] === '.' && b[rank][6] === '.') {
+          if (!isSquareAttacked(rank, 5, enemy, b) && !isSquareAttacked(rank, 6, enemy, b)) {
+            moves.push({ r: rank, c: 6, isCapture: false, isCastleKS: true });
+          }
+        }
+        // Queenside castling (O-O-O)
+        const canCastleQS = isWhite ? (!hasMoved.wK && !hasMoved.wR_qs) : (!hasMoved.bK && !hasMoved.bR_qs);
+        if (canCastleQS && b[rank][3] === '.' && b[rank][2] === '.' && b[rank][1] === '.') {
+          if (!isSquareAttacked(rank, 3, enemy, b) && !isSquareAttacked(rank, 2, enemy, b)) {
+            moves.push({ r: rank, c: 2, isCapture: false, isCastleQS: true });
+          }
+        }
+      }
+    }
+
+    return moves;
+  }
+
+  function getStrictlyLegalMoves(r, c) {
+    const piece = board[r][c];
+    if (piece === '.') return [];
+    const isWhite = piece === piece.toUpperCase();
+    const color = isWhite ? 'w' : 'b';
+    if (color !== currentTurn) return [];
+
+    const candidates = getCandidateMoves(r, c, board);
+    const legal = [];
+
+    for (const m of candidates) {
+      const simBoard = board.map(row => [...row]);
+      
+      if (m.isEnPassant) {
+        simBoard[r][m.c] = '.';
+      }
+
+      if (m.isCastleKS) {
+        simBoard[r][5] = simBoard[r][7];
+        simBoard[r][7] = '.';
+      } else if (m.isCastleQS) {
+        simBoard[r][3] = simBoard[r][0];
+        simBoard[r][0] = '.';
+      }
+
+      simBoard[m.r][m.c] = simBoard[r][c];
+      simBoard[r][c] = '.';
+
+      // Discard any move where own king remains or becomes in check!
+      if (!isKingInCheck(color, simBoard)) {
+        legal.push(m);
+      }
+    }
+
+    return legal;
+  }
+
+  function hasAnyLegalMoves(color) {
+    for (let r = 0; r < 8; r++) {
+      for (let c = 0; c < 8; c++) {
+        const p = board[r][c];
+        if (p !== '.') {
+          const isWhite = p === p.toUpperCase();
+          if ((color === 'w' && isWhite) || (color === 'b' && !isWhite)) {
+            const moves = getStrictlyLegalMoves(r, c);
+            if (moves.length > 0) return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
 
   function renderBoard() {
     grid.innerHTML = '';
+    const inCheck = isKingInCheck(currentTurn, board);
+    const checkedKing = inCheck ? findKing(currentTurn, board) : null;
+
     for (let r = 0; r < 8; r++) {
       for (let c = 0; c < 8; c++) {
         const sq = document.createElement('div');
@@ -3620,8 +3908,19 @@ function initPlayableChessEngine() {
         sq.dataset.row = r;
         sq.dataset.col = c;
 
+        // Selected square highlight
         if (selectedSquare && selectedSquare.r === r && selectedSquare.c === c) {
           sq.classList.add('sq-selected');
+        }
+
+        // Last move highlight
+        if (lastMove && ((lastMove.from.r === r && lastMove.from.c === c) || (lastMove.to.r === r && lastMove.to.c === c))) {
+          sq.classList.add('sq-last-move');
+        }
+
+        // King in check highlight
+        if (checkedKing && checkedKing.r === r && checkedKing.c === c) {
+          sq.classList.add('sq-in-check');
         }
 
         const piece = board[r][c];
@@ -3633,7 +3932,7 @@ function initPlayableChessEngine() {
           sq.appendChild(pSpan);
         }
 
-        // Highlight legal move indicators
+        // Highlight strictly legal move indicators
         const legal = legalMoves.find(m => m.r === r && m.c === c);
         if (legal) {
           if (legal.isCapture) {
@@ -3654,11 +3953,37 @@ function initPlayableChessEngine() {
 
     if (whiteCap) whiteCap.innerHTML = capturedByWhite.map(p => glyphs[p] || p).join(' ');
     if (blackCap) blackCap.innerHTML = capturedByBlack.map(p => glyphs[p] || p).join(' ');
-    if (turnText) turnText.textContent = `${currentTurn === 'w' ? 'WHITE' : 'BLACK'} (Move #${moveCount})`;
-    if (statusPill) statusPill.textContent = `Turn: ${currentTurn === 'w' ? 'White to Move' : 'Black to Move'}`;
+    if (turnText) {
+      turnText.textContent = `${currentTurn === 'w' ? 'WHITE' : 'BLACK'} (Move #${moveCount})`;
+    }
+
+    // Status pill state
+    if (statusPill) {
+      if (gameOver) {
+        if (inCheck) {
+          const winner = currentTurn === 'w' ? 'Black' : 'White';
+          statusPill.textContent = `🏆 Checkmate! ${winner} Wins!`;
+          statusPill.className = 'console-status-pill error';
+        } else {
+          statusPill.textContent = '🤝 Draw (Stalemate)';
+          statusPill.className = 'console-status-pill';
+        }
+      } else if (inCheck) {
+        statusPill.textContent = `⚠️ CHECK! ${currentTurn === 'w' ? 'White' : 'Black'} King in danger!`;
+        statusPill.className = 'console-status-pill error';
+      } else {
+        statusPill.textContent = `Turn: ${currentTurn === 'w' ? 'White to Move' : 'Black to Move'}`;
+        statusPill.className = 'console-status-pill success';
+      }
+    }
   }
 
   function handleSquareClick(r, c) {
+    if (gameOver) {
+      if (logBar) logBar.textContent = '>> Game has concluded. Click "Reset Chessboard" to start a new match.';
+      return;
+    }
+
     const clickedPiece = board[r][c];
     const isOwnPiece = clickedPiece !== '.' &&
       ((currentTurn === 'w' && clickedPiece === clickedPiece.toUpperCase()) ||
@@ -3667,17 +3992,28 @@ function initPlayableChessEngine() {
     // 1. If clicking a legal move destination
     const move = legalMoves.find(m => m.r === r && m.c === c);
     if (move && selectedSquare) {
-      executeMove(selectedSquare.r, selectedSquare.c, move.r, move.c, move.isEnPassant);
+      executeMove(selectedSquare.r, selectedSquare.c, move.r, move.c, move);
       selectedSquare = null;
       legalMoves = [];
       renderBoard();
       return;
     }
 
-    // 2. If clicking own piece, select and compute moves
+    // 2. If clicking own piece, select and compute strictly legal moves
     if (isOwnPiece) {
       selectedSquare = { r, c };
-      legalMoves = computeLegalMoves(r, c);
+      legalMoves = getStrictlyLegalMoves(r, c);
+
+      // Helpful audio/text guidance if 0 legal moves (pinned or check)
+      if (legalMoves.length === 0 && logBar) {
+        const inCheck = isKingInCheck(currentTurn, board);
+        if (inCheck) {
+          logBar.textContent = `>> [Check Defense Required]: Your King is in check! This piece cannot block or escape the threat.`;
+        } else {
+          logBar.textContent = `>> [Absolute Pin]: This piece is pinned to your King and cannot move out of the line of fire.`;
+        }
+      }
+
       renderBoard();
       return;
     }
@@ -3688,117 +4024,23 @@ function initPlayableChessEngine() {
     renderBoard();
   }
 
-  function computeLegalMoves(r, c) {
-    const piece = board[r][c];
-    if (piece === '.') return [];
-    const isWhite = piece === piece.toUpperCase();
-    const moves = [];
-
-    // PAWN
-    if (piece.toLowerCase() === 'p') {
-      const dir = isWhite ? -1 : 1;
-      const startRank = isWhite ? 6 : 1;
-
-      // 1-step forward
-      if (r + dir >= 0 && r + dir < 8 && board[r + dir][c] === '.') {
-        moves.push({ r: r + dir, c: c, isCapture: false });
-        // 2-step forward from start
-        if (r === startRank && board[r + 2 * dir][c] === '.') {
-          moves.push({ r: r + 2 * dir, c: c, isCapture: false, isPawnDouble: true });
-        }
-      }
-
-      // Diagonal captures
-      [-1, 1].forEach(dc => {
-        const nr = r + dir;
-        const nc = c + dc;
-        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-          const target = board[nr][nc];
-          if (target !== '.' && isOpponentPiece(target, isWhite)) {
-            moves.push({ r: nr, c: nc, isCapture: true });
-          }
-          // En Passant check
-          if (enPassantTarget && enPassantTarget.r === nr && enPassantTarget.c === nc) {
-            moves.push({ r: nr, c: nc, isCapture: true, isEnPassant: true });
-          }
-        }
-      });
-    }
-
-    // KNIGHT
-    if (piece.toLowerCase() === 'n') {
-      const jumps = [
-        [-2, -1], [-2, 1], [-1, -2], [-1, 2],
-        [1, -2], [1, 2], [2, -1], [2, 1]
-      ];
-      jumps.forEach(([dr, dc]) => {
-        const nr = r + dr, nc = c + dc;
-        if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-          const target = board[nr][nc];
-          if (target === '.') moves.push({ r: nr, c: nc, isCapture: false });
-          else if (isOpponentPiece(target, isWhite)) moves.push({ r: nr, c: nc, isCapture: true });
-        }
-      });
-    }
-
-    // BISHOP / ROOK / QUEEN (Rays)
-    const dirs = [];
-    if (piece.toLowerCase() === 'b' || piece.toLowerCase() === 'q') {
-      dirs.push([-1, -1], [-1, 1], [1, -1], [1, 1]);
-    }
-    if (piece.toLowerCase() === 'r' || piece.toLowerCase() === 'q') {
-      dirs.push([-1, 0], [1, 0], [0, -1], [0, 1]);
-    }
-    dirs.forEach(([dr, dc]) => {
-      let step = 1;
-      while (true) {
-        const nr = r + dr * step;
-        const nc = c + dc * step;
-        if (nr < 0 || nr >= 8 || nc < 0 || nc >= 8) break;
-        const target = board[nr][nc];
-        if (target === '.') {
-          moves.push({ r: nr, c: nc, isCapture: false });
-        } else {
-          if (isOpponentPiece(target, isWhite)) {
-            moves.push({ r: nr, c: nc, isCapture: true });
-          }
-          break;
-        }
-        step++;
-      }
-    });
-
-    // KING
-    if (piece.toLowerCase() === 'k') {
-      for (let dr = -1; dr <= 1; dr++) {
-        for (let dc = -1; dc <= 1; dc++) {
-          if (dr === 0 && dc === 0) continue;
-          const nr = r + dr, nc = c + dc;
-          if (nr >= 0 && nr < 8 && nc >= 0 && nc < 8) {
-            const target = board[nr][nc];
-            if (target === '.') moves.push({ r: nr, c: nc, isCapture: false });
-            else if (isOpponentPiece(target, isWhite)) moves.push({ r: nr, c: nc, isCapture: true });
-          }
-        }
-      }
-    }
-
-    return moves;
-  }
-
-  function isOpponentPiece(p, isWhite) {
-    if (p === '.') return false;
-    return isWhite ? p === p.toLowerCase() : p === p.toUpperCase();
-  }
-
-  function executeMove(fromR, fromC, toR, toC, isEnPassant) {
+  function executeMove(fromR, fromC, toR, toC, moveData = {}) {
     const p = board[fromR][fromC];
     const target = board[toR][toC];
     const isWhite = p === p.toUpperCase();
-    const files = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+    // Track castling rights
+    if (p === 'K') hasMoved.wK = true;
+    if (p === 'k') hasMoved.bK = true;
+    if (fromR === 7 && fromC === 7) hasMoved.wR_ks = true;
+    if (fromR === 7 && fromC === 0) hasMoved.wR_qs = true;
+    if (fromR === 0 && fromC === 7) hasMoved.bR_ks = true;
+    if (fromR === 0 && fromC === 0) hasMoved.bR_qs = true;
+
+    let notation = '';
 
     // En Passant capture execution
-    if (isEnPassant) {
+    if (moveData.isEnPassant) {
       const capturedPawnRow = fromR;
       const capturedPawnCol = toC;
       const capturedPawn = board[capturedPawnRow][capturedPawnCol];
@@ -3806,16 +4048,29 @@ function initPlayableChessEngine() {
       if (isWhite) capturedByWhite.push(capturedPawn);
       else capturedByBlack.push(capturedPawn);
 
-      logMove(`${files[fromC]}x${files[toC]}${8 - toR} e.p.`);
-      if (logBar) logBar.textContent = `>> [EN PASSANT EXECUTED]: Captured pawn at ${files[toC]}${8 - capturedPawnRow} removed!`;
+      notation = `${files[fromC]}x${files[toC]}${8 - toR} e.p.`;
+      if (logBar) logBar.textContent = `>> [EN PASSANT]: Pawn at ${files[toC]}${8 - capturedPawnRow} captured!`;
+    } else if (moveData.isCastleKS) {
+      // Kingside castling
+      board[fromR][5] = board[fromR][7];
+      board[fromR][7] = '.';
+      notation = 'O-O';
+      if (logBar) logBar.textContent = `>> [CASTLING]: ${isWhite ? 'White' : 'Black'} castled kingside (O-O).`;
+    } else if (moveData.isCastleQS) {
+      // Queenside castling
+      board[fromR][3] = board[fromR][0];
+      board[fromR][0] = '.';
+      notation = 'O-O-O';
+      if (logBar) logBar.textContent = `>> [CASTLING]: ${isWhite ? 'White' : 'Black'} castled queenside (O-O-O).`;
     } else {
-      // Normal capture
+      // Normal move or capture
+      const pieceUpper = p.toUpperCase();
       if (target !== '.') {
         if (isWhite) capturedByWhite.push(target);
         else capturedByBlack.push(target);
-        logMove(`${p !== 'P' && p !== 'p' ? p.toUpperCase() : files[fromC]}x${files[toC]}${8 - toR}`);
+        notation = `${pieceUpper !== 'P' ? pieceUpper : files[fromC]}x${files[toC]}${8 - toR}`;
       } else {
-        logMove(`${p !== 'P' && p !== 'p' ? p.toUpperCase() : ''}${files[toC]}${8 - toR}`);
+        notation = `${pieceUpper !== 'P' ? pieceUpper : ''}${files[toC]}${8 - toR}`;
       }
     }
 
@@ -3826,13 +4081,46 @@ function initPlayableChessEngine() {
       enPassantTarget = null;
     }
 
-    // Move piece
+    // Move piece on board
     board[toR][toC] = p;
     board[fromR][fromC] = '.';
+
+    // Pawn Promotion (auto-Queen)
+    if (p === 'P' && toR === 0) {
+      board[toR][toC] = 'Q';
+      notation += '=Q';
+      if (logBar) logBar.textContent = `>> [PROMOTION]: White pawn promoted to Queen at ${files[toC]}8!`;
+    } else if (p === 'p' && toR === 7) {
+      board[toR][toC] = 'q';
+      notation += '=Q';
+      if (logBar) logBar.textContent = `>> [PROMOTION]: Black pawn promoted to Queen at ${files[toC]}1!`;
+    }
+
+    lastMove = { from: { r: fromR, c: fromC }, to: { r: toR, c: toC } };
 
     // Switch turn
     currentTurn = currentTurn === 'w' ? 'b' : 'w';
     if (currentTurn === 'w') moveCount++;
+
+    // Evaluate check & legal moves for the new turn
+    const inCheck = isKingInCheck(currentTurn, board);
+    const hasMoves = hasAnyLegalMoves(currentTurn);
+
+    if (!hasMoves) {
+      gameOver = true;
+      if (inCheck) {
+        notation += '#';
+        const winner = currentTurn === 'w' ? 'Black' : 'White';
+        if (logBar) logBar.textContent = `>> CHECKMATE! ${currentTurn === 'w' ? 'White' : 'Black'} King is mated. ${winner} wins!`;
+      } else {
+        if (logBar) logBar.textContent = `>> STALEMATE: ${currentTurn === 'w' ? 'White' : 'Black'} has no legal moves. Match is a draw.`;
+      }
+    } else if (inCheck) {
+      notation += '+';
+      if (logBar) logBar.textContent = `>> CHECK! ${currentTurn === 'w' ? 'White' : 'Black'} King is under attack!`;
+    }
+
+    logMove(notation);
   }
 
   function logMove(notation) {
@@ -3861,6 +4149,13 @@ function initPlayableChessEngine() {
     moveCount = 1;
     capturedByWhite = [];
     capturedByBlack = [];
+    lastMove = null;
+    gameOver = false;
+    hasMoved = {
+      wK: false, wR_ks: false, wR_qs: false,
+      bK: false, bR_ks: false, bR_qs: false
+    };
+
     if (moveLog) moveLog.innerHTML = '<div>1. Game initialized. Standard setup.</div>';
     if (logBar) logBar.textContent = '>> Chessboard reset. Turn: White to Move.';
     renderBoard();
@@ -3870,21 +4165,16 @@ function initPlayableChessEngine() {
   if (btnEnPassant) {
     btnEnPassant.addEventListener('click', () => {
       resetBoard();
-      if (logBar) logBar.textContent = '>> Setting up En Passant demonstration...';
-
-      // 1. e4 (White)
-      executeMove(6, 4, 4, 4, false);
-      // 1... a6 (Black dummy)
-      executeMove(1, 0, 2, 0, false);
-      // 2. e5 (White pushes to 5th rank)
-      executeMove(4, 4, 3, 4, false);
-      // 3. d5 (Black 2-step adjacent double push!)
-      executeMove(1, 3, 3, 3, false);
+      // 1. e4 a6
+      executeMove(6, 4, 4, 4, {});
+      executeMove(1, 0, 2, 0, {});
+      // 2. e5 d5 (Black 2-step double push!)
+      executeMove(4, 4, 3, 4, {});
+      executeMove(1, 3, 3, 3, { isPawnDouble: true });
 
       renderBoard();
-
       if (logBar) {
-        logBar.textContent = '>> En Passant opportunity ready! Click White pawn at e5 -> click d6 indicator dot!';
+        logBar.textContent = '>> En Passant setup ready! Click White pawn at e5 -> click d6 green ring to execute e.p.!';
       }
     });
   }
@@ -3894,17 +4184,21 @@ function initPlayableChessEngine() {
     btnScholars.addEventListener('click', () => {
       resetBoard();
       // 1. e4 e5
-      executeMove(6, 4, 4, 4, false);
-      executeMove(1, 4, 3, 4, false);
+      executeMove(6, 4, 4, 4, {});
+      executeMove(1, 4, 3, 4, {});
       // 2. Bc4 Nc6
-      executeMove(7, 5, 4, 2, false);
-      executeMove(0, 1, 2, 2, false);
+      executeMove(7, 5, 4, 2, {});
+      executeMove(0, 1, 2, 2, {});
       // 3. Qh5 Nf6??
-      executeMove(7, 3, 3, 7, false);
-      executeMove(0, 6, 2, 5, false);
+      executeMove(7, 3, 3, 7, {});
+      executeMove(0, 6, 2, 5, {});
+      // 4. Qxf7# (Checkmate!)
+      executeMove(3, 7, 1, 5, { isCapture: true });
 
       renderBoard();
-      if (logBar) logBar.textContent = '>> Scholar\'s Mate threat setup! White Queen threatens Qxf7# mate.';
+      if (logBar) {
+        logBar.textContent = ">> Scholar's Mate executed (Qxf7#)! Black King is in Checkmate (Queen protected by Bishop at c4).";
+      }
     });
   }
 
